@@ -5,5 +5,5 @@
 * RubikNotes.py: A script for generating the illustrations.
 * [Gan's CFOP](CFOPRemade): A quite old version of Gan's CFOP, remade.
 
-## Licences
+## License
 Consider it as public domain.
