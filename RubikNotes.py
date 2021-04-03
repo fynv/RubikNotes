@@ -2715,7 +2715,10 @@ void main()
 cube = RubiksCube()
 # cube.exec_seq("RUR'U'R'FRF'", reverse = True)
 # cube.exec_seq("RUR'U'R'FR2U'R'U'RUR'F'", reverse = True)
-cube.exec_seq("URU'R'U'y'R'URy", reverse = True)
+
+cube.exec_seq("RU'U'R'URU'U'R'Uy'R'U'Ry", reverse = True)
+# cube.exec_seq("URU'R'U'y'R'URy", reverse = True)
+
 
 p_view = PerspectiveView(fn_skin = "skin_f2l.png")
 p_view.set_camera(256, 256, 45, glm.lookAt(glm.vec3(8.0,6.0,10.0), glm.vec3(0.0,-0.5,0.0), glm.vec3(0.0, 1.0, 0.0)))
