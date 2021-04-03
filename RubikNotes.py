@@ -2716,8 +2716,8 @@ cube = RubiksCube()
 # cube.exec_seq("RUR'U'R'FRF'", reverse = True)
 # cube.exec_seq("RUR'U'R'FR2U'R'U'RUR'F'", reverse = True)
 
-cube.exec_seq("RU'U'R'URU'U'R'Uy'R'U'Ry", reverse = True)
-# cube.exec_seq("URU'R'U'y'R'URy", reverse = True)
+cube.exec_seq("(R' F' RU)(R U' R' F)", reverse = True)
+
 
 
 p_view = PerspectiveView(fn_skin = "skin_f2l.png")
