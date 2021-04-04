@@ -1159,7 +1159,7 @@ void main()
         
         gpu_map = vki.device_vector_from_numpy(cube.map)
         gpu_up_face_only = vki.SVInt32(up_face_only)
-        self.rp.launch([(4*3+9)*6], [colorBuf], None, [0.0,0.0,0.0,1.0], 1.0, [gpu_map, gpu_up_face_only])
+        self.rp.launch([(4*3+9)*6], [colorBuf], None, [0.0,0.05,0.05,1.0], 1.0, [gpu_map, gpu_up_face_only])
 
         image_out = np.empty((self.wh, self.wh, 4), dtype=np.uint8)
         colorBuf.download(image_out)
