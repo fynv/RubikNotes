@@ -1,6 +1,7 @@
 # Gan's CFOP Remade
 
-[toc]
+## Table of  Contents
+### [F2L](#F2L)  
 
 ## F2L
 
