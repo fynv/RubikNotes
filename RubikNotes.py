@@ -933,11 +933,7 @@ class RubiksCube:
             i = 0
             while i<len(seq):
                 c = seq[i]
-                if c in self.op_map:
-                    count = 1
-                    if i < len(seq) -1 and seq[i+1]=="2":
-                        count = 2
-                        i+=1
+                if c in self.op_map:                    
                     if i < len(seq) -1 and (seq[i+1]=="'" or seq[i+1]=="`"):
                         if reverse:
                             op = self.op_map[c][0]
@@ -949,6 +945,12 @@ class RubiksCube:
                             op = self.op_map[c][1]
                         else:
                             op = self.op_map[c][0]
+
+                    count = 1
+                    if i < len(seq) -1 and seq[i+1]=="2":
+                        count = 2
+                        i+=1
+
                     for j in range(count):
                         operations +=[op]
                 i+=1
@@ -1184,7 +1186,35 @@ cube = RubiksCube()
 # cube.exec_seq("y' (R' U)(R U')(R' U R) y", reverse = True)
 # cube.exec_seq("(R U R' U' )(R U R') ", reverse = True)
 # cube.exec_seq("(R U R' U') (R U R' U') (R U R')", reverse = True)
-cube.exec_seq("(R U' R') y' (R' U2 R) y", reverse = True)
+# cube.exec_seq("(R U' R') y' (R' U2 R) y", reverse = True)
+# cube.exec_seq("y' (R' U2)(R U R' U')R y", reverse = True)
+# cube.exec_seq("y' U'(R' U2)(R U' R' U)R y", reverse = True)
+# cube.exec_seq("y'(R' U R U'U')(R' U' R) y", reverse = True)
+# cube.exec_seq("y' (U2 R2' U2)(R U R' U R2) y", reverse = True)
+# cube.exec_seq("(R U R')U2(R U R' U')(R U R')", reverse = True)
+# cube.exec_seq("(R U' R' U2)(R U R')", reverse = True)
+# cube.exec_seq("U(R U'U')(R' U R U' )R'", reverse = True)
+# cube.exec_seq("(R U'U')(R' U' R U)R'", reverse = True)
+# cube.exec_seq("U'(R U')(R' U2)(R U' R')", reverse = True)
+# cube.exec_seq("U'(RUR')U(F'U'F)", reverse = True)
+# cube.exec_seq("d (R' U R U')(R' U' R) y", reverse = True)
+# cube.exec_seq("y' (R' U' R) y", reverse = True)
+# cube.exec_seq("(d R' U' R U')(R' U' R) y", reverse = True)
+# cube.exec_seq("y' (R U'U')R'2 U' R2 U' R' y", reverse = True)
+# cube.exec_seq("y' (R' U)(R d' U')(R U R') ", reverse = True)
+# cube.exec_seq("U'(R U'U')(R'U2)(RU'R')", reverse = True)
+# cube.exec_seq("U'(R U R' U')(R U'U' R')", reverse = True)
+# cube.exec_seq("URU'R'", reverse = True)
+# cube.exec_seq("U' (R U'U' R' U)(R U R')", reverse = True)
+# cube.exec_seq("d (R' U' R) d' (R U R')", reverse = True)
+# cube.exec_seq("y' U' (R' U R) y", reverse = True)
+# cube.exec_seq("(d R' U' R U'U')(R' U R) y", reverse = True)
+# cube.exec_seq("d (R' U2)(R U'U')(R' U R) y", reverse = True)
+# cube.exec_seq("(R U' R' U)(d R' U' R) y", reverse = True)
+# cube.exec_seq("(R'U2)(R2'U)(R2'UR)", reverse = True)
+# cube.exec_seq("U'(R U R' U)(R U R')", reverse = True)
+# cube.exec_seq("(R U R')", reverse = True)
+cube.exec_seq("U' (R U' R' U)(R U R')", reverse = True)
 
 
 p_view = PerspectiveView(fn_skin = "skin_f2l.png")
