@@ -1102,14 +1102,14 @@ void main()
         id_in_face_out = id_sq_out - 9;
         id_face_out = 0;
 
-        pos.x = 0.78 + k.x*0.02;
+        pos.x = 0.78 + k.x*0.05;
         pos.y = -0.77 + 0.52*float(2 - id_in_face_out) + k.y*0.5;
     }
     else if(id_sq_out<15)
     {
         id_in_face_out = id_sq_out - 12;
         id_face_out = 1;
-        pos.x = -0.8 + k.x*0.02;
+        pos.x = -0.83 + k.x*0.05;
         pos.y = -0.77 + 0.52*float(id_in_face_out) + k.y*0.5;
     }
     else if(id_sq_out<18)
@@ -1117,7 +1117,7 @@ void main()
         id_in_face_out = id_sq_out - 15;
         id_face_out = 4;
         pos.x = -0.77 + 0.52*float(id_in_face_out) + k.x*0.5;
-        pos.y = 0.78 + k.y*0.02;
+        pos.y = 0.78 + k.y*0.05;
 
     }
     else
@@ -1125,7 +1125,7 @@ void main()
         id_in_face_out = id_sq_out - 18;
         id_face_out = 5;
         pos.x = -0.77 + 0.52*float(2 - id_in_face_out) + k.x*0.5;
-        pos.y = -0.8 + k.y*0.02;
+        pos.y = -0.83 + k.y*0.05;
     }
     
     gl_Position = vec4(pos, 0.5, 1.0);
@@ -1138,7 +1138,7 @@ void main()
 '''
 const vec3 colors[12] = { 
     vec3(0.0, 1.0, 0.0), vec3(0.0, 0.0, 1.0), vec3(1.0, 1.0, 0.0), vec3(1.0, 1.0, 1.0), vec3(1.0, 0.0, 0.0), vec3(1.0, 0.2, 0.0),
-    vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), vec3(1.0, 1.0, 0.0), vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0) };
+    vec3(0.2, 0.2, 0.2), vec3(0.2, 0.2, 0.2), vec3(1.0, 1.0, 0.0), vec3(0.2, 0.2, 0.2), vec3(0.2, 0.2, 0.2), vec3(0.2, 0.2, 0.2) };
 
 layout (location = 0) flat in uint v_id_face_in;
 layout (location = 0) out vec4 outColor;
@@ -1159,7 +1159,7 @@ void main()
         
         gpu_map = vki.device_vector_from_numpy(cube.map)
         gpu_up_face_only = vki.SVInt32(up_face_only)
-        self.rp.launch([(4*3+9)*6], [colorBuf], None, [0.0,0.05,0.05,1.0], 1.0, [gpu_map, gpu_up_face_only])
+        self.rp.launch([(4*3+9)*6], [colorBuf], None, [0.0,0.0,0.0,1.0], 1.0, [gpu_map, gpu_up_face_only])
 
         image_out = np.empty((self.wh, self.wh, 4), dtype=np.uint8)
         colorBuf.download(image_out)
@@ -1168,11 +1168,17 @@ void main()
 
 
 cube = RubiksCube()
+
 # cube.exec_seq("RUR'U'R'FRF'", reverse = True)
 # cube.exec_seq("RUR'U'R'FR2U'R'U'RUR'F'", reverse = True)
-# cube.exec_seq("(R' F' RU)(R U' R' F)", reverse = True)
 
-cube.exec_seq("(R U' R U)y(R U' R' F2)y'", reverse = True)
+# cube.exec_seq("(R U'U' R' U) (R U'U' R' U) y'(R' U' R) y", reverse = True)
+# cube.exec_seq("(U R U' R' U') y'(R' U R) y", reverse = True)
+# cube.exec_seq("(R' F' RU)(R U' R' F)", reverse = True)
+# cube.exec_seq("(R U R' U')(R U'U' R' U')(R U R')", reverse = True)
+# cube.exec_seq("(R U' R U)y(R U' R' F2)y'", reverse = True)
+# cube.exec_seq("y'(R' U' R U)(R' U' R)y", reverse = True)
+cube.exec_seq("(R U' R' U)(R U' R')", reverse = True)
 
 p_view = PerspectiveView(fn_skin = "skin_f2l.png")
 p_view.set_camera(256, 256, 45, glm.lookAt(glm.vec3(8.0,6.0,10.0), glm.vec3(0.0,-0.5,0.0), glm.vec3(0.0, 1.0, 0.0)))

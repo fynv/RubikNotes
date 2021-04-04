@@ -29,4 +29,10 @@
 <br/>(RU'RU)y(RU'R'F2)
 </div>
 
+<div style = "margin:5px; border-style: solid;">
+<img src="images/f2l_6.png" width="150">
+<br/>y'(R'U'RU)(R'U'R)
+</div>
+
+
 </div>
