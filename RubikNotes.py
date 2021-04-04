@@ -1071,12 +1071,12 @@ void main()
 class TopView:
     def __init__(self):
         self.wh = 512
-        self.rp = vki.Rasterizer(["map"], type_locked=True)
+        self.rp = vki.Rasterizer(["map", "up_face_only"], type_locked=True)
         self.rp.add_draw_call(vki.DrawCall(
 '''
 const vec2 positions[6] = { vec2(0.0, 0.0), vec2(0.0, 1.0), vec2(1.0, 1.0), vec2(1.0, 1.0), vec2(1.0, 0.0), vec2(0.0, 0.0) };    
 
-layout (location = 0) flat out uint id_face_in;
+layout (location = 0) flat out uint v_id_face_in;
 
 void main() 
 {   
@@ -1132,17 +1132,21 @@ void main()
 
     id_sq_out = id_face_out * 9 + id_in_face_out;
     uint id_sq_in = get_value(map, id_sq_out);
-    id_face_in = id_sq_in / 9;
+    v_id_face_in = id_sq_in / 9;
 }
 ''',
 '''
-const vec3 colors[6] = { vec3(0.0, 1.0, 0.0), vec3(0.0, 0.0, 1.0), vec3(1.0, 1.0, 0.0), vec3(1.0, 1.0, 1.0), vec3(1.0, 0.0, 0.0), vec3(1.0, 0.2, 0.0) };
+const vec3 colors[12] = { 
+    vec3(0.0, 1.0, 0.0), vec3(0.0, 0.0, 1.0), vec3(1.0, 1.0, 0.0), vec3(1.0, 1.0, 1.0), vec3(1.0, 0.0, 0.0), vec3(1.0, 0.2, 0.0),
+    vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), vec3(1.0, 1.0, 0.0), vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0) };
 
-layout (location = 0) flat in uint id_face_in;
+layout (location = 0) flat in uint v_id_face_in;
 layout (location = 0) out vec4 outColor;
 
 void main() 
 {
+    uint id_face_in = v_id_face_in;
+    if (up_face_only!=0) id_face_in+=6;
     outColor = vec4(colors[id_face_in],1.0);
 }
 '''))
@@ -1150,11 +1154,12 @@ void main()
     def set_size(self, wh):
         self.wh = wh
 
-    def render(self, cube, filename):                
+    def render(self, cube, filename, up_face_only=False):                
         colorBuf = vki.Texture2D(self.wh, self.wh, VK_FORMAT_R8G8B8A8_SRGB)             
         
-        gpu_map = vki.device_vector_from_numpy(cube.map)        
-        self.rp.launch([(4*3+9)*6], [colorBuf], None, [0.0,0.0,0.0,1.0], 1.0, [gpu_map])
+        gpu_map = vki.device_vector_from_numpy(cube.map)
+        gpu_up_face_only = vki.SVInt32(up_face_only)
+        self.rp.launch([(4*3+9)*6], [colorBuf], None, [0.0,0.0,0.0,1.0], 1.0, [gpu_map, gpu_up_face_only])
 
         image_out = np.empty((self.wh, self.wh, 4), dtype=np.uint8)
         colorBuf.download(image_out)
@@ -1165,15 +1170,16 @@ void main()
 cube = RubiksCube()
 # cube.exec_seq("RUR'U'R'FRF'", reverse = True)
 # cube.exec_seq("RUR'U'R'FR2U'R'U'RUR'F'", reverse = True)
+# cube.exec_seq("(R' F' RU)(R U' R' F)", reverse = True)
 
-cube.exec_seq("(R' F' RU)(R U' R' F)", reverse = True)
+cube.exec_seq("r'U'RU'R'U2r", reverse = True)
 
-p_view = PerspectiveView(fn_skin = "skin_f2l.png")
+p_view = PerspectiveView(fn_skin = "skin_ul_only.png")
 p_view.set_camera(256, 256, 45, glm.lookAt(glm.vec3(8.0,6.0,10.0), glm.vec3(0.0,-0.5,0.0), glm.vec3(0.0, 1.0, 0.0)))
 p_view.render(cube, 'perspective.png')
 
 t_view = TopView()
-t_view.render(cube, 'top.png')
+t_view.render(cube, 'top.png', up_face_only = True)
 
 
 
