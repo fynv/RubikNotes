@@ -1214,7 +1214,9 @@ cube = RubiksCube()
 # cube.exec_seq("(R'U2)(R2'U)(R2'UR)", reverse = True)
 # cube.exec_seq("U'(R U R' U)(R U R')", reverse = True)
 # cube.exec_seq("(R U R')", reverse = True)
-cube.exec_seq("U' (R U' R' U)(R U R')", reverse = True)
+# cube.exec_seq("U' (R U' R' U)(R U R')", reverse = True)
+
+cube.exec_seq("(R U'U')(R2' F R F')U2(R' F R F')", reverse = True)
 
 
 p_view = PerspectiveView(fn_skin = "skin_f2l.png")
