@@ -221,6 +221,22 @@
 <div style = "margin:5px; border-style: solid;">
 <img src="images/OLL_1.png" width="150" >
 <br/>(RU'U')(R2'FRF')U2(R'FRF')
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_2.png" width="150" >
+<br/>(FRUR'U'F')(fRUR'U'f')
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_3.png" width="150" >
+<br/>(FRUR'U'F')(fRUR'U'f')
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_4.png" width="150" >
+<br/>(FRUR'U'F')(fRUR'U'f')
+</div>
 
 </div>
 
