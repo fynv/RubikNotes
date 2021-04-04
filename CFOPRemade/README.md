@@ -1,7 +1,7 @@
 # Gan's CFOP Remade
 
-## Table of  Contents
-### [F2L](#F2L)  
+- [F2L](#F2L)  
+- [OLL](#OLL)  
 
 ## F2L
 
@@ -210,6 +210,18 @@
 <div style = "margin:5px; border-style: solid;">
 <img src="images/f2l_41.png" width="150">
 <br/>U'(RU'R'U)(RUR')
+</div>
+
+</div>
+
+## OLL
+
+<div style = "display: flex; flex-wrap: wrap;" >
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_1.png" width="150" >
+<br/>(RU'U')(R2'FRF')U2(R'FRF')
+
 </div>
 
 </div>
