@@ -1,5 +1,7 @@
 # Gan's CFOP Remade
 
+[toc]
+
 ## F2L
 
 <div style = "display: flex; flex-wrap: wrap;" >
