@@ -1,7 +1,6 @@
 # Gan's CFOP Remade
 
-- [F2L](#F2L)  
-- [OLL](#OLL)  
+{:toc}
 
 ## F2L
 
