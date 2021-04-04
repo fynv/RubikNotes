@@ -1172,9 +1172,9 @@ cube = RubiksCube()
 # cube.exec_seq("RUR'U'R'FR2U'R'U'RUR'F'", reverse = True)
 # cube.exec_seq("(R' F' RU)(R U' R' F)", reverse = True)
 
-cube.exec_seq("r'U'RU'R'U2r", reverse = True)
+cube.exec_seq("(R U' R U)y(R U' R' F2)y'", reverse = True)
 
-p_view = PerspectiveView(fn_skin = "skin_ul_only.png")
+p_view = PerspectiveView(fn_skin = "skin_f2l.png")
 p_view.set_camera(256, 256, 45, glm.lookAt(glm.vec3(8.0,6.0,10.0), glm.vec3(0.0,-0.5,0.0), glm.vec3(0.0, 1.0, 0.0)))
 p_view.render(cube, 'perspective.png')
 
