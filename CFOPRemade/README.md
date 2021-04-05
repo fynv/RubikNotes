@@ -219,23 +219,288 @@
 <div style = "display: flex; flex-wrap: wrap;" >
 
 <div style = "margin:5px; border-style: solid;">
-<img src="images/OLL_1.png" width="150" >
+<img src="images/OLL_1.png" width="128" >
 <br/>(RU'U')(R2'FRF')U2(R'FRF')
 </div>
 
 <div style = "margin:5px; border-style: solid;">
-<img src="images/OLL_2.png" width="150" >
+<img src="images/OLL_2.png" width="128" >
 <br/>(FRUR'U'F')(fRUR'U'f')
 </div>
 
 <div style = "margin:5px; border-style: solid;">
-<img src="images/OLL_3.png" width="150" >
-<br/>(FRUR'U'F')(fRUR'U'f')
+<img src="images/OLL_3.png" width="128" >
+<br/>f(RUR'U')f'U'F(RUR'U')F'
 </div>
 
 <div style = "margin:5px; border-style: solid;">
-<img src="images/OLL_4.png" width="150" >
-<br/>(FRUR'U'F')(fRUR'U'f')
+<img src="images/OLL_4.png" width="128" >
+<br/>f(RUR'U')yx(R'F)(RUR'U')F'
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_5.png" width="128" >
+<br/>(r'U2)(RUR'U)r
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_6.png" width="128" >
+<br/>(rU'U')(R'U'RU'r')
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_7.png" width="128" >
+<br/>rUR'URU'U'r'
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_8.png" width="128" >
+<br/>r'U'RU'R'U2r
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_9.png" width="128" >
+<br/>(R'U'R)y'x'(RU')(R'F)(RUR')
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_10.png" width="128" >
+<br/>(RUR'U)(R'FRF')(RU'U'R')
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_11.png" width="128" >
+<br/>r'(R2UR'U)(RU'U'R'U)(rR')
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_12.png" width="128" >
+<br/>(rR'2U'RU')(R'U2RU'R)r'
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_13.png" width="128" >
+<br/>(rU'r'U')(rUr')(F'UF)
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_14.png" width="128" >
+<br/>R'FRUR'F'R(FU'F')
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_15.png" width="128" >
+<br/>(r'U'r)(R'U'RU)(r'Ur)
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_16.png" width="128" >
+<br/>(rUr')(RUR'U')(rU'r')
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_17.png" width="128" >
+<br/>(RUR'U)(R'FRF'U2)R'FRF'
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_18.png" width="128" >
+<br/>R'U2FRUR'U'y'R2U'U'RB
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_19.png" width="128" >
+<br/>R'U2FRUR'U'y'R2U'U'RB
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_20.png" width="128" >
+<br/>r'(RU)(RUR'U'r2)(R2'U)(R U')r'
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_21.png" width="128" >
+<br/>(RU'U')(R'U'RUR'U')(RU'R')
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_22.png" width="128" >
+<br/>RU'U'(R'2U')(R2U')R'2U'U'R
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_23.png" width="128" >
+<br/>(R2D')(RU'U')(R'D)(RU'U'R)
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_24.png" width="128" >
+<br/>x'RUR'z'(RU)(L'U'R')
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_25.png" width="128" >
+<br/>F'(rUR'U')(r'FR)
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_26.png" width="128" >
+<br/>RU'U'R'U'RU'R'
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_27.png" width="128" >
+<br/>RU'U'R'U'RU'R'
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_28.png" width="128" >
+<br/>(rUR'U')(r'RU)(RU'R')
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_29.png" width="128" >
+<br/>(RUR'U')(RU'R'F'U'F)(RUR')
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_30.png" width="128" >
+<br/>(R2UR'B')(RU')(R2'U)(RBR')
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_31.png" width="128" >
+<br/>(r'F'UF)(LF'L'U'r)
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_32.png" width="128" >
+<br/>(RU)(B'U')(R'URBR')
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_33.png" width="128" >
+<br/>(RUR'U')(R'FRF')
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_34.png" width="128" >
+<br/>(R'U'RU)x'z'(RU)(LU')rR'
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_35.png" width="128" >
+<br/>RU'U'R2'FRF'(RU'U'R')
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_36.png" width="128" >
+<br/>R'U'RU'R'URUlU'R'U
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_37.png" width="128" >
+<br/>F(RU'R'U'RU)(R'F')
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_38.png" width="128" >
+<br/>(RUR'U)(RU'R'U')(R'FRF')
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_39.png" width="128" >
+<br/>(rU'r'U'r)y(RUR'f')
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_40.png" width="128" >
+<br/>(R'FRUR'U')(F'UR)
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_41.png" width="128" >
+<br/>RU'R'U2RUyRU'R'U'F'
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_42.png" width="128" >
+<br/>(R'U2)(RUR'UR2)y(RUR'U')F'
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_43.png" width="128" >
+<br/>(B'U')(R'URB)
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_44.png" width="128" >
+<br/>f(RUR'U')f'
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_45.png" width="128" >
+<br/>F(RUR'U')F'
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_46.png" width="128" >
+<br/>(R'U')R'FRF'(UR)
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_47.png" width="128" >
+<br/>B'(R'U'RU)2B
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_48.png" width="128" >
+<br/>F(RUR'U')2F'
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_49.png" width="128" >
+<br/>RB'(R2F)(R2B)R2F'R
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_50.png" width="128" >
+<br/>L'B(L2F')(L2B')L2FL'
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_51.png" width="128" >
+<br/>f(RUR'U')2f'
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_52.png" width="128" >
+<br/>R'U'RU'R'dR'UlU
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_53.png" width="128" >
+<br/>(r'U2)(RUR'U')(RUR'U)r 
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_54.png" width="128" >
+<br/>(rU'U')(R'U'RUR'U')(RU'r')
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_55.png" width="128" >
+<br/>(RU'U')(R'2U')RU'R'U2(FRF')
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_56.png" width="128" >
+<br/>F(RUR'U')(RF')(rUR'U')r'
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/OLL_57.png" width="128" >
+<br/>(RUR'U'r)(R'U)(RU'r')
 </div>
 
 </div>
