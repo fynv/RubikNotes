@@ -7,6 +7,16 @@
 
 ## Usage of RubikNotes.py
 
+Install dependencies:
+
+```
+$ pip install pillow
+$ pip install VkInline
+```
+VkInline requires Win64/Linux64 with Vulkan enabled GPU driver.
+
+Run the following example:
+
 ```python
 import glm
 from RubikNotes import RubiksCube, PerspectiveView, TopView
