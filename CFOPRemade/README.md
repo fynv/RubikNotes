@@ -504,3 +504,114 @@
 </div>
 
 </div>
+
+## PLL
+
+<div style = "display: flex; flex-wrap: wrap;" >
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/PLL_1.png" width="128" >
+<br/>(RU'R)(URUR)(U'R'U'R2)
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/PLL_2.png" width="128" >
+<br/>(R2'U)(RUR'U')(R'U')(R'UR')
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/PLL_3.png" width="128" >
+<br/>L2(l'2U)L2(l'2U2)L2(l'2U)L2l2
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/PLL_4.png" width="128" >
+<br/>(UR'U')(RU'R)(URU')(R'URU)(R2U')(R'U)
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/PLL_5.png" width="128" >
+<br/>x'R2D2(R'U'R)D2(R'UR')
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/PLL_6.png" width="128" >
+<br/>x'R2D2(R'U'R)D2(R'UR')
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/PLL_7.png" width="128" >
+<br/>x'(RU'R'D)(RUR')u2'(R'UR)D(R'U'R)
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/PLL_8.png" width="128" >
+<br/>(RUR'U')(R'F)(R2U'R'U')(RUR'F')
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/PLL_9.png" width="128" >
+<br/>U'(R'URU'R'2b')x(R'UR)y'(RUR'U'R2)
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/PLL_10.png" width="128" >
+<br/>(R'UR'U')yx2(R'UR'U'R2)xz'(R'U'RUR)
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/PLL_11.png" width="128" >
+<br/>F(RU'R'U')(RUR'F')(RUR'U')(R'FRF')
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/PLL_12.png" width="128" >
+<br/>z(U'RD')(R2UR'U'R2U)z'(RU')
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/PLL_13.png" width="128" >
+<br/>(RUR'F')(RUR'U')(R'FR2U'R'U')
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/PLL_14.png" width="128" >
+<br/>((R'U2)(R U'U')(R'FRUR'U')(R'F'R2 U')
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/PLL_15.png" width="128" >
+<br/>(RU'U')(R'U2)(RB'R'U')(RURBR2'U)
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/PLL_16.png" width="128" >
+<br/>(R2'u'RU'R)(UR'u)(R2fR'f')
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/PLL_17.png" width="128" >
+<br/>(RUR')y'(R2'u'RU')(R'UR'uR2)
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/PLL_18.png" width="128" >
+<br/>(R2u)(R'UR'U')(Ru')(R2'F'UF)
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/PLL_19.png" width="128" >
+<br/>(R'd'F)(R2u)(R'U)(RU'Ru'R2)
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/PLL_20.png" width="128" >
+<br/>z(R'UR')z'(RU2L'UR')z(UR')z'(RU2L'UR')
+</div>
+
+<div style = "margin:5px; border-style: solid;">
+<img src="images/PLL_21.png" width="128" >
+<br/>z(U'RD')(R2UR'U')z'(RUR')z(R2UR')z'(RU')
+</div>
+
+</div>
