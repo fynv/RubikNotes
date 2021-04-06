@@ -142,6 +142,7 @@ for i in range(len(F2L)):
 	cube.exec_seq(seq, reverse=True)
 	p_view.render(cube, filename)
 	
+# OLL 	
 for i in range(len(OLL)):
 	filename = f"CFOPRemade/images/OLL_{i+1}.png"
 	print(f"Rendering {filename}")
@@ -150,6 +151,7 @@ for i in range(len(OLL)):
 	cube.exec_seq(seq, reverse=True)
 	t_view.render(cube, filename, up_face_only=True)
 
+# PLL 
 for i in range(len(PLL)):
 	filename = f"CFOPRemade/images/PLL_{i+1}.png"
 	print(f"Rendering {filename}")
