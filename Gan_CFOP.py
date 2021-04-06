@@ -127,7 +127,13 @@ PLL = [
 "z(R' U R')z'(R U2 L' U R') z(U R')z'(R U2 L' U R')",
 "z(U'R D')(R2 U R'U')z'(R U R')z(R2 U R')z'(R U')"]
 
-p_view = PerspectiveView(fn_skin = "skin_f2l.png")
+OrangeD = True
+
+if OrangeD:
+	p_view = PerspectiveView(fn_skin = "skin_fei_f2l.png")
+else:
+	p_view = PerspectiveView(fn_skin = "skin_f2l.png")
+
 p_view.set_camera(256, 256, 45, glm.lookAt(glm.vec3(8.0,6.0,10.0), glm.vec3(0.0,-0.5,0.0), glm.vec3(0.0, 1.0, 0.0)))
 t_view = TopView()
 t_view.set_size(256)
@@ -148,8 +154,14 @@ for i in range(len(OLL)):
 	print(f"Rendering {filename}")
 	seq = OLL[i]
 	cube = RubiksCube()
+	if OrangeD:
+		cube.XCW()
 	cube.exec_seq(seq, reverse=True)
-	t_view.render(cube, filename, up_face_only=True)
+
+	if OrangeD:
+		t_view.render(cube, filename, up_face_only=True, up_face_id = 4)
+	else:
+		t_view.render(cube, filename, up_face_only=True)
 
 # PLL 
 for i in range(len(PLL)):
@@ -157,6 +169,8 @@ for i in range(len(PLL)):
 	print(f"Rendering {filename}")
 	seq = PLL[i]
 	cube = RubiksCube()
+	if OrangeD:
+		cube.XCW()
 	cube.exec_seq(seq, reverse=True)
 	t_view.render(cube, filename)
 
