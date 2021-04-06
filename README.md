@@ -36,7 +36,7 @@ Rotate twice: add a '2' R2 L2 R'2
 Optional: 
 Setting parameter reverse=True will reverse the execution. This would be helpful if you are making an illustration for a tutorial.
 '''
-cube.exec_seq("x2y2U'DF'BR'LU'D")
+cube.exec_seq("z2U'DF'BR'LU'D")
 
 '''
 Create a perspective-viewing renderer
