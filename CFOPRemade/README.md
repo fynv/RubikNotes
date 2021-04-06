@@ -305,7 +305,7 @@
 
 <div style = "margin:5px; border-style: solid;">
 <img src="images/OLL_18.png" width="128" >
-<br/>R'U2FRUR'U'y'R2U'U'RB
+<br/>F(RUR'd)(R'U2)(R'FRF')
 </div>
 
 <div style = "margin:5px; border-style: solid;">
