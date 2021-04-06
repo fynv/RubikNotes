@@ -992,6 +992,8 @@ class PerspectiveView:
         view_mat = glm.lookAt(glm.vec3(10.0,10.0,10.0), glm.vec3(0.0,0.0,0.0), glm.vec3(0.0, 1.0, 0.0))
         self.matrix = proj_mat*view_mat
 
+        self.bg_color = [1.0, 1.0, 1.0, 1.0]
+
         skin_in =  np.array(Image.open(fn_skin).convert('RGBA'))
         self.skin = vki.Cubemap(skin_in.shape[1], skin_in.shape[1], VK_FORMAT_R8G8B8A8_SRGB)
         self.skin.upload(skin_in)
@@ -1066,6 +1068,9 @@ void main()
     outColor = texture(arr_cubemap[0], dir);
 }
 '''))
+
+    def set_background_color(self, bg_color):
+        self.bg_color = [bg_color[0], bg_color[1], bg_color[2], 1.0]
         
     def set_camera(self, width, height, fovy, view_mat):
         self.width = width
@@ -1081,7 +1086,7 @@ void main()
         gpu_matrix = vki.SVMat4x4(self.matrix)
         gpu_map = vki.device_vector_from_numpy(cube.map)
         gpu_dirs = vki.device_vector_from_numpy(cube.dirs)
-        self.rp.launch([6*9*6], [colorBuf4x], depthBuf4x, [1.0, 1.0, 1.0, 1.0], 1.0, [gpu_matrix, gpu_map, gpu_dirs], resolveBufs=[colorBuf], cubemaps = [self.skin])
+        self.rp.launch([6*9*6], [colorBuf4x], depthBuf4x, self.bg_color, 1.0, [gpu_matrix, gpu_map, gpu_dirs], resolveBufs=[colorBuf], cubemaps = [self.skin])
 
         image_out = np.empty((self.height, self.width, 4), dtype=np.uint8)
         colorBuf.download(image_out)
@@ -1090,9 +1095,11 @@ void main()
 
 
 class TopView:
-    def __init__(self):
+    def __init__(self, colors = [[0.0, 1.0, 0.0], [0.0, 0.0, 1.0], [1.0, 1.0, 0.0], [1.0, 1.0, 1.0], [1.0, 0.0, 0.0], [1.0, 0.2, 0.0], [0.2, 0.2, 0.2]]):
         self.wh = 512
-        self.rp = vki.Rasterizer(["map", "up_face_only"], type_locked=True)
+        self.bg_color = [0.0,0.0,0.0,1.0]
+        self.colors = np.array(colors, dtype = np.float32)
+        self.rp = vki.Rasterizer(["map", "colors", "up_face_id"], type_locked=True)
         self.rp.add_draw_call(vki.DrawCall(
 '''
 const vec2 positions[6] = { vec2(0.0, 0.0), vec2(0.0, 1.0), vec2(1.0, 1.0), vec2(1.0, 1.0), vec2(1.0, 0.0), vec2(0.0, 0.0) };    
@@ -1157,30 +1164,37 @@ void main()
 }
 ''',
 '''
-const vec3 colors[12] = { 
-    vec3(0.0, 1.0, 0.0), vec3(0.0, 0.0, 1.0), vec3(1.0, 1.0, 0.0), vec3(1.0, 1.0, 1.0), vec3(1.0, 0.0, 0.0), vec3(1.0, 0.2, 0.0),
-    vec3(0.2, 0.2, 0.2), vec3(0.2, 0.2, 0.2), vec3(1.0, 1.0, 0.0), vec3(0.2, 0.2, 0.2), vec3(0.2, 0.2, 0.2), vec3(0.2, 0.2, 0.2) };
-
 layout (location = 0) flat in uint v_id_face_in;
 layout (location = 0) out vec4 outColor;
 
 void main() 
-{
-    uint id_face_in = v_id_face_in;
-    if (up_face_only!=0) id_face_in+=6;
-    outColor = vec4(colors[id_face_in],1.0);
+{    
+    if (up_face_id!=-1 && v_id_face_in != up_face_id)
+    {    
+        outColor = vec4(get_value(colors,6),1.0);
+    }
+    else
+    {
+        outColor = vec4(get_value(colors,v_id_face_in),1.0);
+    }    
 }
 '''))
 
     def set_size(self, wh):
         self.wh = wh
 
-    def render(self, cube, filename, up_face_only=False):                
+    def set_background_color(self, bg_color):
+        self.bg_color = [bg_color[0], bg_color[1], bg_color[2], 1.0]        
+
+    def render(self, cube, filename, up_face_only=False, up_face_id = 2):                
         colorBuf = vki.Texture2D(self.wh, self.wh, VK_FORMAT_R8G8B8A8_SRGB)             
         
         gpu_map = vki.device_vector_from_numpy(cube.map)
-        gpu_up_face_only = vki.SVInt32(up_face_only)
-        self.rp.launch([(4*3+9)*6], [colorBuf], None, [0.0,0.0,0.0,1.0], 1.0, [gpu_map, gpu_up_face_only])
+        gpu_colors = vki.device_vector_from_numpy(self.colors)
+        if not up_face_only:
+            up_face_id = -1
+        gpu_up_face_id = vki.SVInt32(up_face_id)
+        self.rp.launch([(4*3+9)*6], [colorBuf], None, self.bg_color, 1.0, [gpu_map, gpu_colors, gpu_up_face_id])
 
         image_out = np.empty((self.wh, self.wh, 4), dtype=np.uint8)
         colorBuf.download(image_out)
