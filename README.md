@@ -26,9 +26,10 @@ cube = RubiksCube()
 
 '''
 Execute a sequence to change the state of the cube
-Single-layer Clockwise: RLUDFB
-Dual-layer Clockwise: rludfb
+Single-layer: RLUDFB
+Dual-layer: rludfb
 Whole-cube rotate: xyz
+Middle Slice: EMS
 Counterclockwise: add an apostrophe R'L'U'...
 Rotate twice: add a '2' R2 L2 R'2
 

@@ -19,7 +19,8 @@ class RubiksCube:
         "D": [self.DCW, self.DCCW], "d": [self.D2CW, self.D2CCW],
         "F": [self.FCW, self.FCCW], "f": [self.F2CW, self.F2CCW],
         "B": [self.BCW, self.BCCW], "b": [self.B2CW, self.B2CCW],
-        "x": [self.XCW, self.XCCW], "y": [self.YCW, self.YCCW], "z": [self.ZCW, self.ZCCW] }
+        "x": [self.XCW, self.XCCW], "y": [self.YCW, self.YCCW], "z": [self.ZCW, self.ZCCW], 
+        "E": [self.ECW, self.ECCW], "M": [self.MCW, self.MCCW], "S": [self.SCW, self.SCCW]}
 
     def XCW0(self):
         map_old = self.map.copy()
@@ -926,6 +927,24 @@ class RubiksCube:
         self.ZCCW0()
         self.ZCCW1()
         self.ZCCW2()
+
+    def MCW(self):
+        self.XCCW1()
+
+    def MCCW(self):
+        self.XCW1()
+
+    def ECW(self):
+        self.YCCW1()
+
+    def ECCW(self):
+        self.YCW1()
+
+    def SCW(self):
+        self.ZCW1()
+
+    def SCCW(self):
+        self.ZCCW1()
 
     def exec_seq(self, seq, reverse=False):
         if type(seq) is str:
