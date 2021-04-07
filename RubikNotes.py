@@ -990,14 +990,11 @@ class RubiksCube:
         for op in operations:
             op()
 
-    def render_seq(self, p_view, seq, reverse = False, filename = None):
+    def render_seq(self, p_view, seq, reverse = False, filename = None, text_size = 32):
         operations, notes = self.parse_seq(seq, reverse)
         l = len(operations) + 1
         bw = int(math.sqrt(l)+0.5)
         bh = (l + bw -1)//bw
-
-        text_size = 32
-
         width = bw * (p_view.width+10)
         height = bh * (p_view.height + text_size +10)
 
@@ -1017,7 +1014,6 @@ class RubiksCube:
                 draw = ImageDraw.Draw(canvas)
                 offset = ((canvas_width - text_width) // 2, (cavans_height - text_height) // 2)
                 draw.text(offset, text, font=pil_font, fill="#000000")
-                # sub_arr = np.array(canvas)
                 image_out[y*(p_view.height+text_size+10)+5:y*(p_view.height+text_size+10)+5+cavans_height, x*(p_view.width+10)+5:x*(p_view.width+10)+5+canvas_width] = canvas
 
             image = p_view.render(self)
