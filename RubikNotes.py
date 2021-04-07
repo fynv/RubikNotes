@@ -1,7 +1,7 @@
 import VkInline as vki
 import math
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 import glm
 
 VK_FORMAT_R8G8B8A8_SRGB = 43
@@ -946,42 +946,91 @@ class RubiksCube:
     def SCCW(self):
         self.ZCCW1()
 
-    def exec_seq(self, seq, reverse=False):
-        if type(seq) is str:
-            operations = []
-            i = 0
-            while i<len(seq):
-                c = seq[i]
-                if c in self.op_map:                    
-                    if i < len(seq) -1 and (seq[i+1]=="'" or seq[i+1]=="`"):
-                        if reverse:
-                            op = self.op_map[c][0]
-                        else:
-                            op = self.op_map[c][1]
-                        i+=1
+    def parse_seq(self, seq, reverse=False):
+        operations = []
+        notes = []
+        i = 0
+        while i<len(seq):
+            c = seq[i]
+            if c in self.op_map:                    
+                if i < len(seq) -1 and (seq[i+1]=="'" or seq[i+1]=="`"):
+                    if reverse:
+                        op = self.op_map[c][0]
+                        note = c
                     else:
-                        if reverse:                            
-                            op = self.op_map[c][1]
-                        else:
-                            op = self.op_map[c][0]
+                        op = self.op_map[c][1]
+                        note = c+"'"
+                    i+=1
+                else:
+                    if reverse:                            
+                        op = self.op_map[c][1]
+                        note = c+"'"
+                    else:
+                        op = self.op_map[c][0]
+                        note = c
 
-                    count = 1
-                    if i < len(seq) -1 and seq[i+1]=="2":
-                        count = 2
-                        i+=1
+                count = 1
+                if i < len(seq) -1 and seq[i+1]=="2":
+                    count = 2
+                    i+=1
 
-                    for j in range(count):
-                        operations +=[op]
-                i+=1
-        else:
-            operations = seq
+                for j in range(count):
+                    operations +=[op]
+                    notes += [note]
+            i+=1
 
         if reverse:
-            for op in reversed(operations):
+            operations = reversed(operations)
+            notes = reversed(notes)
+
+        return operations, notes
+
+    def exec_seq(self, seq, reverse=False):
+        operations, notes = self.parse_seq(seq, reverse)
+        for op in operations:
+            op()
+
+    def render_seq(self, p_view, seq, reverse = False, filename = None):
+        operations, notes = self.parse_seq(seq, reverse)
+        l = len(operations) + 1
+        bw = int(math.sqrt(l)+0.5)
+        bh = (l + bw -1)//bw
+
+        text_size = 32
+
+        width = bw * (p_view.width+10)
+        height = bh * (p_view.height + text_size +10)
+
+        pil_font = ImageFont.truetype("arial.ttf", size = 32, encoding="unic")        
+
+        image_out = np.full((height, width, 4), 255, dtype=np.uint8)
+        for i in range(l):
+            x = i % bw
+            y = i // bw
+
+            if i>0:
+                text = notes[i-1]
+                text_width, text_height = pil_font.getsize(text)
+                canvas_width = text_size*len(text)
+                cavans_height = text_size
+                canvas = Image.new('RGBA', [canvas_width, cavans_height], (255, 255, 255,255))
+                draw = ImageDraw.Draw(canvas)
+                offset = ((canvas_width - text_width) // 2, (cavans_height - text_height) // 2)
+                draw.text(offset, text, font=pil_font, fill="#000000")
+                # sub_arr = np.array(canvas)
+                image_out[y*(p_view.height+text_size+10)+5:y*(p_view.height+text_size+10)+5+cavans_height, x*(p_view.width+10)+5:x*(p_view.width+10)+5+canvas_width] = canvas
+
+            image = p_view.render(self)
+            image_out[y*(p_view.height+text_size+10)+5+text_size:y*(p_view.height+text_size+10)+5+text_size+p_view.height, x*(p_view.width+10)+5:x*(p_view.width+10)+5+p_view.width] = image
+
+            if i<l-1:
+                op = operations[i]
                 op()
-        else:
-            for op in operations:
-                op()        
+
+        if not filename is None:
+            Image.fromarray(image_out, 'RGBA').save(filename)       
+
+        return image_out
 
           
 class PerspectiveView:
@@ -1078,7 +1127,7 @@ void main()
         proj_mat = glm.perspective(glm.radians(fovy), self.width/self.height, 0.1, 1000.0)
         self.matrix = proj_mat*view_mat
 
-    def render(self, cube, filename):        
+    def render(self, cube, filename = None):        
         colorBuf = vki.Texture2D(self.width, self.height, VK_FORMAT_R8G8B8A8_SRGB)
         colorBuf4x = vki.Texture2D(self.width, self.height, VK_FORMAT_R8G8B8A8_SRGB, samples=4)
         depthBuf4x = vki.Texture2D(self.width, self.height, VK_FORMAT_D32_SFLOAT, isDepth=True, samples=4)       
@@ -1091,7 +1140,10 @@ void main()
         image_out = np.empty((self.height, self.width, 4), dtype=np.uint8)
         colorBuf.download(image_out)
 
-        Image.fromarray(image_out, 'RGBA').save(filename)        
+        if not filename is None:
+            Image.fromarray(image_out, 'RGBA').save(filename)       
+
+        return image_out
 
 
 class TopView:
@@ -1186,7 +1238,7 @@ void main()
     def set_background_color(self, bg_color):
         self.bg_color = [bg_color[0], bg_color[1], bg_color[2], 1.0]        
 
-    def render(self, cube, filename, up_face_only=False, up_face_id = 2):                
+    def render(self, cube, filename = None, up_face_only=False, up_face_id = 2):                
         colorBuf = vki.Texture2D(self.wh, self.wh, VK_FORMAT_R8G8B8A8_SRGB)             
         
         gpu_map = vki.device_vector_from_numpy(cube.map)
@@ -1199,6 +1251,9 @@ void main()
         image_out = np.empty((self.wh, self.wh, 4), dtype=np.uint8)
         colorBuf.download(image_out)
 
-        Image.fromarray(image_out, 'RGBA').save(filename) 
+        if not filename is None:
+            Image.fromarray(image_out, 'RGBA').save(filename) 
+
+        return image_out
 
 
