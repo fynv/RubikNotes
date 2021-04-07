@@ -127,7 +127,7 @@ PLL = [
 "z(R' U R')z'(R U2 L' U R') z(U R')z'(R U2 L' U R')",
 "z(U'R D')(R2 U R'U')z'(R U R')z(R2 U R')z'(R U')"]
 
-OrangeD = True
+OrangeD = False
 
 if OrangeD:
 	p_view = PerspectiveView(fn_skin = "skin_fei_f2l.png")

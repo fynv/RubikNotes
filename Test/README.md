@@ -1,1 +1,1 @@
-<iframe src="https://cubing.github.io/AnimCubeJS/cube3.html?colorscheme=wygbor&move=z2U'DF'BR'LU'D&movetext=1&metric=2&fonttype=0&snap=1&buttonheight=20" frameborder="0" width="120" height="139"></iframe>
+<iframe src="https://cubing.github.io/AnimCubeJS/cube3.html?colorscheme=wygbor&move=U'DF'BR'LU'D&movetext=1&metric=2&fonttype=0&snap=1&buttonheight=20" frameborder="0" width="120" height="139"></iframe>
