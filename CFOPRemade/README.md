@@ -9,12 +9,12 @@
 
 <div style = "margin:5px; border-style: solid;">
 <img src="images/f2l_1.png" width="150" >
-<br/>(R U'U'R'U)2 y' (R'U'R)
+<br/>(RU'U'R'U)2y'(R'U'R)
 </div>
 
 <div style = "margin:5px; border-style: solid;">
 <img src="images/f2l_2.png" width="150">
-<br/>(URU'R'U') y'(R'UR)
+<br/>(URU'R'U')y'(R'UR)
 </div>
 
 <div style = "margin:5px; border-style: solid;">
