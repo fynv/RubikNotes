@@ -8,7 +8,7 @@
 
 ## Usage of RubikNotes.py
 
-Install dependencies:
+### Install dependencies
 
 ```
 $ pip install pillow
@@ -16,7 +16,7 @@ $ pip install VkInline
 ```
 VkInline requires Win64/Linux64 with Vulkan enabled GPU driver.
 
-Run the following example:
+### Basic example
 
 ```python
 import glm
@@ -68,6 +68,43 @@ Setting parameter up_face_only=True will turn all faces except for the upper fac
 t_view.render(cube, 'top.png')
 ```
 
+![](perspective.png)
+![](top.png)
+
+### Sequence rendering
+
+RubikNotes allows you to render a sequence of movement as a single image.
+
+```python
+import glm
+from RubikNotes import RubiksCube, PerspectiveView, TopView
+
+cube = RubiksCube()
+cube.exec_seq("(RU'U')(R2'FRF')U2(R'FRF')", reverse=True)
+
+p_view = PerspectiveView()
+p_view.set_camera(256, 256, 45, glm.lookAt(glm.vec3(8.0,6.0,10.0), glm.vec3(0.0,-0.5,0.0), glm.vec3(0.0, 1.0, 0.0)))
+
+cube.render_seq(p_view, "(RU'U')(R2'FRF')U2(R'FRF')", filename="full.png")
+```
+![](full.png)
+
+To reduce the image size, optionally, movements can be grouped by the brackets, then render the states after each group of movements.
+
+```python
+import glm
+from RubikNotes import RubiksCube, PerspectiveView, TopView
+
+cube = RubiksCube()
+cube.exec_seq("(RU'U')(R2'FRF')U2(R'FRF')", reverse=True)
+
+p_view = PerspectiveView()
+p_view.set_camera(256, 256, 45, glm.lookAt(glm.vec3(8.0,6.0,10.0), glm.vec3(0.0,-0.5,0.0), glm.vec3(0.0, 1.0, 0.0)))
+
+cube.render_seq(p_view, "(RU'U')(R2'FRF')U2(R'FRF')", filename="grouped.png", grouped = True)
+```
+
+![](grouped.png)
 
 ## License
 Consider it as public domain.
