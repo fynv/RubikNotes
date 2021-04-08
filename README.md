@@ -4,7 +4,6 @@
 
 * RubikNotes.py: A script for generating the illustrations.
 * [Gan's CFOP](CFOPRemade): A quite old version of Gan's CFOP, remade.
-* [Gan's CFOP Animations](AnimCubeJS): Some [AnimCubeJS](https://cubing.github.io/AnimCubeJS/animcubejs.html) based animations.
 
 ## Usage of RubikNotes.py
 
