@@ -949,6 +949,9 @@ class RubiksCube:
     def parse_seq(self, seq, reverse=False):
         operations = []
         notes = []
+        groups = []
+        group_id = 0
+        in_group = False
         i = 0
         while i<len(seq):
             c = seq[i]
@@ -974,25 +977,39 @@ class RubiksCube:
                     count = 2
                     i+=1
 
+                if not in_group:
+                    group_id +=1
                 for j in range(count):
                     operations +=[op]
-                    notes += [note]
+                    notes += [note]                    
+                    groups += [group_id]
+
+            elif c == "(":
+                in_group = True
+                group_id += 1
+            elif c == ")":
+                in_group = False
             i+=1
 
         if reverse:
             operations = reversed(operations)
             notes = reversed(notes)
+            groups = reversed(groups)
 
-        return operations, notes
+        return operations, notes, groups
 
     def exec_seq(self, seq, reverse=False):
-        operations, notes = self.parse_seq(seq, reverse)
+        operations, notes, groups = self.parse_seq(seq, reverse)
         for op in operations:
             op()
 
-    def render_seq(self, p_view, seq, reverse = False, filename = None, text_size = 32):
-        operations, notes = self.parse_seq(seq, reverse)
-        l = len(operations) + 1
+    def render_seq(self, p_view, seq, reverse = False, filename = None, text_size = 32, grouped = False):
+        operations, notes, groups = self.parse_seq(seq, reverse)
+        if grouped:
+            l = groups[len(groups)-1] + 1
+        else:
+            l = len(operations) + 1
+
         bw = int(math.sqrt(l)+0.5)
         bh = (l + bw -1)//bw
         width = bw * (p_view.width+10)
@@ -1001,12 +1018,15 @@ class RubiksCube:
         pil_font = ImageFont.truetype("arial.ttf", size = 32, encoding="unic")        
 
         image_out = np.full((height, width, 4), 255, dtype=np.uint8)
+
+        text = ""
+        j = 0
+
         for i in range(l):
             x = i % bw
             y = i // bw
 
-            if i>0:
-                text = notes[i-1]
+            if len(text)>0:                
                 text_width, text_height = pil_font.getsize(text)
                 canvas_width = text_size*len(text)
                 cavans_height = text_size
@@ -1014,14 +1034,28 @@ class RubiksCube:
                 draw = ImageDraw.Draw(canvas)
                 offset = ((canvas_width - text_width) // 2, (cavans_height - text_height) // 2)
                 draw.text(offset, text, font=pil_font, fill="#000000")
-                image_out[y*(p_view.height+text_size+10)+5:y*(p_view.height+text_size+10)+5+cavans_height, x*(p_view.width+10)+5:x*(p_view.width+10)+5+canvas_width] = canvas
+
+                draw_width = min(canvas_width, p_view.width)
+
+                image_out[y*(p_view.height+text_size+10)+5:y*(p_view.height+text_size+10)+5+cavans_height, x*(p_view.width+10)+5:x*(p_view.width+10)+5+draw_width] = np.array(canvas)[:,:draw_width]
 
             image = p_view.render(self)
             image_out[y*(p_view.height+text_size+10)+5+text_size:y*(p_view.height+text_size+10)+5+text_size+p_view.height, x*(p_view.width+10)+5:x*(p_view.width+10)+5+p_view.width] = image
 
+
             if i<l-1:
-                op = operations[i]
-                op()
+                if not grouped:
+                    text = notes[j]
+                    operations[j]()
+                    j+=1
+
+                else:
+                    text = ""
+                    group_id = groups[j]
+                    while j<len(groups) and groups[j] == group_id:
+                        text += notes[j]
+                        operations[j]()
+                        j+=1                        
 
         if not filename is None:
             Image.fromarray(image_out, 'RGBA').save(filename)       
