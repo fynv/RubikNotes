@@ -3,7 +3,7 @@
 <script type="text/javascript">
 function test()
 {
-	document.getElementById('txt').src = "https://cubing.github.io/AnimCubeJS/cube3.html?facelets=lllllllllwwwwwwwwwl11l11l11l00l00l00lll333333l22l22l22&initrevmove=RU'U'R'URU'U'R'Uy'R'U'Ry&move=RU'U'R'URU'U'R'Uy'R'U'R&repeat=0&edit=0&movetext=1&metric=2&fonttype=0&snap=1&buttonheight=20&yz=1";
+	document.getElementById('view').src = "https://cubing.github.io/AnimCubeJS/cube3.html?facelets=lllllllllwwwwwwwwwl11l11l11l00l00l00lll333333l22l22l22&initrevmove=RU'U'R'URU'U'R'Uy'R'U'Ry&move=RU'U'R'URU'U'R'Uy'R'U'R&repeat=0&edit=0&movetext=1&metric=2&fonttype=0&snap=1&buttonheight=20&yz=1";
 }
 </script>
 
