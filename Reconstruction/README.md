@@ -25,8 +25,13 @@ function item_select()
 
     view.src = src;
 
-    var text_moves = document.getElementById('moves');
-    text_moves.innerHTML=item.move;
+    var para_comment = document.getElementById('comment');
+    var comment = "";
+    if ("comment" in item)
+    {
+        comment = item.comment;
+    }
+    para_comment.innerHTML=comment;
 }
 
 
@@ -36,7 +41,7 @@ function item_select()
 <iframe id="view" src="https://cubing.github.io/AnimCubeJS/cube3.html?colorscheme=ywrobg&repeat=0&edit=0&movetext=1&metric=2&fonttype=0&snap=1&buttonheight=25&yz=1" frameborder="0" width="400" height="400"></iframe>
 
 <div style = "margin:5px;">
-    <p id="moves"></p>
+    <p id="comment"></p>
     <p>
         <select id="list" size = "12" ondblclick="item_select()" style="width: 300px;">
             <script type="text/javascript">
