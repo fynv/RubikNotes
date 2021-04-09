@@ -3,5 +3,10 @@
 		"display_name": "OLL_1",
 		"initrevmove" : "RU'U'R2'FRF'U2R'FRF'",
 		"move": "RU'U'R2'FRF'U2R'FRF'"
+	},
+	{
+		"display_name": "OLL_2",
+		"initrevmove" : "FRUR'U'F'fRUR'U'f'",
+		"move": "FRUR'U'F'fRUR'U'f'"
 	}
 ]
