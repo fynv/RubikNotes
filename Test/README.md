@@ -39,7 +39,7 @@ var repo = sp[3];
 var dir = sp[4];
 var sp2 = domain.split(".");
 var user = sp2[0];
-document.write("<input type=\"button\" onclick=\"location.href='https://github.com/\"+user+\"/\"+repo+\"/edit/master/\"+dir+\"/database.json';\" value=\"Edit\"/>");
+document.write("<input type=\"button\" onclick=\"location.href='https://github.com/"+user+"/"+repo+"/edit/master/"+dir+"/database.json';\" value=\"Edit\"/>");
 </script>
 
 </div>
