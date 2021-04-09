@@ -4,7 +4,7 @@
 
 * RubikNotes.py: A script for generating the illustrations.
 * [Gan's CFOP](CFOPRemade): A quite old version of Gan's CFOP, remade.
-* [Reconstruction Maintenance Test](Reconstruction): On (Speedsolving)[https://www.speedsolving.com/threads/better-way-of-maintaining-personal-reconstructions.79746/], I see there's abunickabhi's demand of maintaining a large number of reconstructions. I believe github-pages + AnimCubeJS is a promising solution. You can create your own 'database' by simply forking this repo.
+* [Reconstruction Maintenance Test](Reconstruction): On [Speedsolving](https://www.speedsolving.com/threads/better-way-of-maintaining-personal-reconstructions.79746/), I see there's abunickabhi's demand of maintaining a large number of reconstructions. I believe github-pages + AnimCubeJS is a promising solution. You can create your own 'database' by simply forking this repo.
 
 ## Usage of RubikNotes.py
 
