@@ -26,7 +26,7 @@ function item_select()
 
 <div style = "margin:5px;">
 	<p id="moves"></p>
-	<select id="list" size = "15" ondblclick="item_select()" style="width: 300px;">
+	<select id="list" size = "12" ondblclick="item_select()" style="width: 300px;">
 		<script type="text/javascript">
 		for (var item of window.data)
 		{
