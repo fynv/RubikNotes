@@ -15,7 +15,7 @@ function item_select()
 	var src = "https://cubing.github.io/AnimCubeJS/cube3.html?colorscheme=ywrobg&repeat=0&edit=0&movetext=1&metric=2&fonttype=0&snap=1&buttonheight=25&yz=1";
 	if ("initmove" in item)
 	{
-		src += "&initmove="+item.initvmove;
+		src += "&initmove="+item.initmove;
 	}
 	else if ("initrevmove" in item)
 	{
