@@ -19,7 +19,7 @@ function item_select()
 </script>
 
 <div style = "display: flex; flex-wrap: wrap;" >
-<iframe id="view" src="https://cubing.github.io/AnimCubeJS/cube3.html?repeat=0&edit=0&movetext=1&metric=2&fonttype=0&snap=1&buttonheight=30&yz=1" frameborder="0" width="400" height="400"></iframe>
+<iframe id="view" src="https://cubing.github.io/AnimCubeJS/cube3.html?colorscheme=ywrobg&repeat=0&edit=0&movetext=1&metric=2&fonttype=0&snap=1&buttonheight=30&yz=1" frameborder="0" width="400" height="400"></iframe>
 
 
 <select id="list" size = "15" ondblclick="item_select()">
