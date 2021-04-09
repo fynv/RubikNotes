@@ -12,6 +12,6 @@
 	{
 		"display_name": "A real reconstruction",
 		"initmove": "U' F2 U B2 D' R2 U F2 L2 D' F2 L' R' F' D B D U2 B2 R2",
-		"move": "F'LF'2BUR'U'B2R'U'2R'URU2R'URUBU'B'B'UBUFU'F'U2F'UFU2F'U'FULU'L'U'B'UBU2FU'F'U'L'ULRU2R'U'RU'R'R2URUR'U'R'U'R'UR'U2"
+		"move": "F'LF2'BUR'U'B2R'U2'R'URU2R'URUBU'B'B'UBUFU'F'U2F'UFU2F'U'FULU'L'U'B'UBU2FU'F'U'L'ULRU2R'U'RU'R'R2URUR'U'R'U'R'UR'U2"
 	}
 ]
