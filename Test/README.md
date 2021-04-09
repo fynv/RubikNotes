@@ -12,24 +12,35 @@ function item_select()
 	var list = document.getElementById('list');
 	var view = document.getElementById('view');
 	var item = window.data[list.selectedIndex];
-	view.src = "https://cubing.github.io/AnimCubeJS/cube3.html?colorscheme=ywrobg&initrevmove="+item.initrevmove+"&move="+item.move+"&repeat=0&edit=0&movetext=1&metric=2&fonttype=0&snap=1&buttonheight=20&yz=1";
+	view.src = "https://cubing.github.io/AnimCubeJS/cube3.html?colorscheme=ywrobg&initrevmove="+item.initrevmove+"&move="+item.move+"&repeat=0&edit=0&movetext=1&metric=2&fonttype=0&snap=1&buttonheight=25&yz=1";
 }
 
 
 </script>
 
 <div style = "display: flex; flex-wrap: wrap;" >
-<iframe id="view" src="https://cubing.github.io/AnimCubeJS/cube3.html?colorscheme=ywrobg&repeat=0&edit=0&movetext=1&metric=2&fonttype=0&snap=1&buttonheight=30&yz=1" frameborder="0" width="400" height="400"></iframe>
+<iframe id="view" src="https://cubing.github.io/AnimCubeJS/cube3.html?colorscheme=ywrobg&repeat=0&edit=0&movetext=1&metric=2&fonttype=0&snap=1&buttonheight=25&yz=1" frameborder="0" width="400" height="400"></iframe>
 
 
 <select id="list" size = "15" ondblclick="item_select()">
 	<script type="text/javascript">
-		for (var item of window.data)
-		{
-			document.write("<option>"+item.display_name+"</option>");
-		}
+	for (var item of window.data)
+	{
+		document.write("<option>"+item.display_name+"</option>");
+	}
 	</script>
 </select>
+
+<script type="text/javascript">
+var url=window.location.href;
+var sp = url.split("/");
+var domain = sp[2];
+var repo = sp[3];
+var dir = sp[4];
+var sp2 = domain.split(".");
+var user = sp2[0];
+document.write("<input type=\"button\" onclick=\"location.href='https://github.com/\"+user+\"/\"+repo+\"/edit/master/\"+dir+\"/database.json';\" value=\"Edit\"/>");
+</script>
 
 </div>
 
