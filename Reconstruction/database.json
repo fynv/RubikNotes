@@ -8,5 +8,10 @@
 		"display_name": "OLL_2",
 		"initrevmove" : "FRUR'U'F'fRUR'U'f'",
 		"move": "FRUR'U'F'fRUR'U'f'"
+	},
+	{
+		"display_name": "A real reconstruction",
+		"initmove" : "U' F2 U B2 D' R2 U F2 L2 D' F2 L' R' F' D B D U2 B2 R2",
+		"move": "F"
 	}
 ]
