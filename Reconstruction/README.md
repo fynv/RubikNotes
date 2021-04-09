@@ -14,7 +14,7 @@ function item_select()
 	var item = window.data[list.selectedIndex];
 	view.src = "https://cubing.github.io/AnimCubeJS/cube3.html?colorscheme=ywrobg&initrevmove="+item.initrevmove+"&move="+item.move+"&repeat=0&edit=0&movetext=1&metric=2&fonttype=0&snap=1&buttonheight=25&yz=1";
 
-	var text_moves = document.getElementById('id');
+	var text_moves = document.getElementById('moves');
 	text_moves.innerHTML=item.move;
 }
 
