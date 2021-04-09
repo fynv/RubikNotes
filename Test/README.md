@@ -21,26 +21,27 @@ function item_select()
 <div style = "display: flex; flex-wrap: wrap;" >
 <iframe id="view" src="https://cubing.github.io/AnimCubeJS/cube3.html?colorscheme=ywrobg&repeat=0&edit=0&movetext=1&metric=2&fonttype=0&snap=1&buttonheight=25&yz=1" frameborder="0" width="400" height="400"></iframe>
 
+<div style = "margin:5px;">
+	<select id="list" size = "15" ondblclick="item_select()" style="width: 300px;">
+		<script type="text/javascript">
+		for (var item of window.data)
+		{
+			document.write("<option>"+item.display_name+"</option>");
+		}
+		</script>
+	</select>
 
-<select id="list" size = "15" ondblclick="item_select()">
 	<script type="text/javascript">
-	for (var item of window.data)
-	{
-		document.write("<option>"+item.display_name+"</option>");
-	}
+	var url=window.location.href;
+	var sp = url.split("/");
+	var domain = sp[2];
+	var repo = sp[3];
+	var dir = sp[4];
+	var sp2 = domain.split(".");
+	var user = sp2[0];
+	document.write("<input type=\"button\" onclick=\"location.href='https://github.com/"+user+"/"+repo+"/edit/master/"+dir+"/database.json';\" value=\"Edit\"/>");
 	</script>
-</select>
-
-<script type="text/javascript">
-var url=window.location.href;
-var sp = url.split("/");
-var domain = sp[2];
-var repo = sp[3];
-var dir = sp[4];
-var sp2 = domain.split(".");
-var user = sp2[0];
-document.write("<input type=\"button\" onclick=\"location.href='https://github.com/"+user+"/"+repo+"/edit/master/"+dir+"/database.json';\" value=\"Edit\"/>");
-</script>
+</div>
 
 </div>
 
