@@ -2,7 +2,7 @@
 
 <script type="text/javascript">
 var request = new XMLHttpRequest();
-request.open('GET', "database.json", false);
+request.open('GET', "database.json?cb=" + new Date().getTime(), false);
 request.send(null);
 
 window.data = JSON.parse(request.responseText);
