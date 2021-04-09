@@ -12,7 +12,18 @@ function item_select()
 	var list = document.getElementById('list');
 	var view = document.getElementById('view');
 	var item = window.data[list.selectedIndex];
-	view.src = "https://cubing.github.io/AnimCubeJS/cube3.html?colorscheme=ywrobg&initrevmove="+item.initrevmove+"&move="+item.move+"&repeat=0&edit=0&movetext=1&metric=2&fonttype=0&snap=1&buttonheight=25&yz=1";
+	var src = "https://cubing.github.io/AnimCubeJS/cube3.html?colorscheme=ywrobg&repeat=0&edit=0&movetext=1&metric=2&fonttype=0&snap=1&buttonheight=25&yz=1";
+	if ("initvmove" in item)
+	{
+		src += "&initvmove="+item.initvmove;
+	}
+	else if ("initrevmove" in item)
+	{
+		src += "&initrevmove="+item.initrevmove;
+	}	
+	src += "&move="+item.move;
+
+	view.src = src;
 
 	var text_moves = document.getElementById('moves');
 	text_moves.innerHTML=item.move;
