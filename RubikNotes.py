@@ -1074,7 +1074,7 @@ class PerspectiveView:
         self.bg_color = [1.0, 1.0, 1.0, 1.0]
 
         skin_in =  np.array(Image.open(fn_skin).convert('RGBA'))
-        self.skin = vki.Cubemap(skin_in.shape[1], skin_in.shape[1], VK_FORMAT_R8G8B8A8_SRGB)
+        self.skin = vki.Cubemap(skin_in.shape[1], skin_in.shape[0]//6, VK_FORMAT_R8G8B8A8_SRGB)
         self.skin.upload(skin_in)
 
         self.rp = vki.Rasterizer(["matrix", "map", "dirs"], type_locked=True)
