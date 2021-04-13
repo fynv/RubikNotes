@@ -1181,12 +1181,13 @@ class TopView:
         self.wh = 512
         self.bg_color = [0.0,0.0,0.0,1.0]
         self.colors = np.array(colors, dtype = np.float32)
-        self.rp = vki.Rasterizer(["map", "colors", "up_face_id"], type_locked=True)
+        self.rp = vki.Rasterizer(["map", "colors", "up_face_id", "cross_mode"], type_locked=True)
         self.rp.add_draw_call(vki.DrawCall(
 '''
 const vec2 positions[6] = { vec2(0.0, 0.0), vec2(0.0, 1.0), vec2(1.0, 1.0), vec2(1.0, 1.0), vec2(1.0, 0.0), vec2(0.0, 0.0) };    
 
 layout (location = 0) flat out uint v_id_face_in;
+layout (location = 1) flat out uint v_id_in_face_in;
 
 void main() 
 {   
@@ -1243,16 +1244,22 @@ void main()
     id_sq_out = id_face_out * 9 + id_in_face_out;
     uint id_sq_in = get_value(map, id_sq_out);
     v_id_face_in = id_sq_in / 9;
+    v_id_in_face_in = id_sq_in % 9;
 }
 ''',
 '''
 layout (location = 0) flat in uint v_id_face_in;
+layout (location = 1) flat in uint v_id_in_face_in;
 layout (location = 0) out vec4 outColor;
 
 void main() 
 {    
     if (up_face_id!=-1 && v_id_face_in != up_face_id)
     {    
+        outColor = vec4(get_value(colors,6),1.0);
+    }
+    else if (cross_mode!=0 && v_id_in_face_in/3!=1 && v_id_in_face_in%3!=1)
+    {
         outColor = vec4(get_value(colors,6),1.0);
     }
     else
@@ -1268,15 +1275,21 @@ void main()
     def set_background_color(self, bg_color):
         self.bg_color = [bg_color[0], bg_color[1], bg_color[2], 1.0]        
 
-    def render(self, cube, filename = None, up_face_only=False, up_face_id = 2):                
+    def render(self, cube, filename = None, up_face_only=False, up_face_id = 2, cross_mode = False):                
         colorBuf = vki.Texture2D(self.wh, self.wh, VK_FORMAT_R8G8B8A8_SRGB)             
         
         gpu_map = vki.device_vector_from_numpy(cube.map)
         gpu_colors = vki.device_vector_from_numpy(self.colors)
+
+        if cross_mode:
+            up_face_only = True
+
         if not up_face_only:
             up_face_id = -1
+
         gpu_up_face_id = vki.SVInt32(up_face_id)
-        self.rp.launch([(4*3+9)*6], [colorBuf], None, self.bg_color, 1.0, [gpu_map, gpu_colors, gpu_up_face_id])
+        gpu_cross_mode = vki.SVInt32(cross_mode)
+        self.rp.launch([(4*3+9)*6], [colorBuf], None, self.bg_color, 1.0, [gpu_map, gpu_colors, gpu_up_face_id, gpu_cross_mode])
 
         image_out = np.empty((self.wh, self.wh, 4), dtype=np.uint8)
         colorBuf.download(image_out)
