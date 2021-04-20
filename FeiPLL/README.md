@@ -1,4 +1,4 @@
-# Modified OLL
+# Modified PLL
 
 <div style = "display: flex; flex-wrap: wrap;" >
 
