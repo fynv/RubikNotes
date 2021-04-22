@@ -3,6 +3,7 @@ import math
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 import glm
+import json
 
 VK_FORMAT_R8G8B8A8_SRGB = 43
 VK_FORMAT_D32_SFLOAT = 126
@@ -21,6 +22,17 @@ class RubiksCube:
         "B": [self.BCW, self.BCCW], "b": [self.B2CW, self.B2CCW],
         "x": [self.XCW, self.XCCW], "y": [self.YCW, self.YCCW], "z": [self.ZCW, self.ZCCW], 
         "E": [self.ECW, self.ECCW], "M": [self.MCW, self.MCCW], "S": [self.SCW, self.SCCW]}
+
+    def to_json(self, filename):
+        j = {"map": self.map.tolist(), "dirs":self.dirs.tolist()}
+        with open(filename, 'w') as outfile:
+            json.dump(j, outfile)
+
+    def from_json(self, filename):
+        with open(filename) as infile:            
+            j =  json.load(infile)
+            self.map = np.array(j["map"], dtype = np.uint32)
+            self.dirs = np.array(j["dirs"], dtype = np.uint32)
 
     def XCW0(self):
         map_old = self.map.copy()

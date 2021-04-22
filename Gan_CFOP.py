@@ -49,7 +49,7 @@ OLL = [
 "(R U'U')(R2' F R F')U2(R' F R F')",
 "(F R U R' U' F')(f R U R' U' f')",
 "f(RUR'U')f'U'F(RUR'U')F'",
-"f(RUR'U')yx(R'F)(RUR'U')F'",
+"f(RUR'U')yx(R'F)(RUR'U')F'y'",
 "(r' U2)(R U R'U) r",
 "(rU'U')(R'U'RU'r')",
 "rUR'URU'U'r'",
@@ -63,13 +63,13 @@ OLL = [
 "(r' U' r)(R'U'R U)(r' U r)",
 "(r U r')(R U R' U')(r U' r')",
 "(R U R' U)(R' F R F'U2)R' F R F'",
-"F (R U R' d)(R' U2)(R' F R F')",
-"R' U2 F R U R'U' y'R2 U'U' R B",
+"F (R U R' d)(R' U2)(R' F R F') y",
+"R' U2 F R U R'U' y'R2 U'U' R B y",
 "r'(R U)(R U R'U' r2)(R2'U) (R U') r'",
 "(R U'U')(R' U' R U R' U') (R U' R')",
 "R U'U' (R'2 U')(R2 U')R'2 U' U'R",
 "(R2 D') (R U'U') (R' D) (R U'U' R)",
-"x' R U R' z'(R U)(L' U' R') x",
+"x' R U R' z'(R U)(L' U' R') x y",
 "F'(rUR'U')(r'FR)",
 "R U'U' R' U'R U' R'",
 "R' U2 R U R' U R",
@@ -79,15 +79,15 @@ OLL = [
 "(r'F'UF)(LF'L'U'r)",
 "(RU)(B'U')(R'URBR')",
 "(R U R' U')(R' F R F')",
-"(R'U'R U) x' z'(R U)(L'U')r R'",
+"(R'U'R U) x' z'(R U)(L'U')r R' y",
 "R U'U'R2' F R F'(R U'U'R')",
 "R'U'R U' R'U R U l U'R'U x",
 "F (R U' R'U'R U) (R' F')",
 "(R U R'U)(RU'R'U')(R'F R F')",
-"(r U' r' U' r)y(R U R' f')",
+"(r U' r' U' r)y(R U R' f') y'",
 "(R' F R U R'U')(F' U R)",
-"RU'R'U2RUyRU'R'U'F'",
-"(R'U2)(R U R' U R2)y(R U R' U')F'",
+"RU'R'U2RUyRU'R'U'F'y'",
+"(R'U2)(R U R' U R2)y(R U R' U')F'y'",
 "(B' U')(R' U R B)",
 "f (R U R' U')f'",
 "F(RUR'U')F'",
@@ -97,7 +97,7 @@ OLL = [
 "R B'(R2 F)(R2 B) R2 F' R",
 "L'B (L2 F')(L2B')L2 F L'",
 "f (R U R' U') (R U R' U') f'",
-"R'U' R U' R' d R' U l U x",
+"R'U' R U' R' d R' U l U x y",
 "(r' U2)(R U R'U')(R U R'U) r ",
 "(r U'U')(R' U' R U R' U')(R U' r')",
 "(R U'U') (R'2 U') R U' R'U2 (F R F')",
@@ -137,7 +137,6 @@ else:
 p_view.set_camera(256, 256, 45, glm.lookAt(glm.vec3(8.0,6.0,10.0), glm.vec3(0.0,-0.5,0.0), glm.vec3(0.0, 1.0, 0.0)))
 t_view = TopView()
 t_view.set_size(256)
-
 
 # F2L
 for i in range(len(F2L)):
