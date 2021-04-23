@@ -9,6 +9,7 @@
   * [OLL](FeiOLL)
   * [PLL](FeiPLL)
 * [Reconstruction Maintenance Test](Reconstruction): On [Speedsolving](https://www.speedsolving.com/threads/better-way-of-maintaining-personal-reconstructions.79746/), I see there's abunickabhi's demand of maintaining a large number of reconstructions. I believe github-pages + AnimCubeJS is a promising solution. You can create your own 'database' by simply forking this repo.
+* [C++ Program](CppCube) for OLL/PLL algorithm discovering
 
 ## Usage of RubikNotes.py
 
