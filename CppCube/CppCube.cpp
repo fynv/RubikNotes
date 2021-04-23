@@ -1149,6 +1149,8 @@ int main()
 	int code_level_min = 0;
 	while (active.size() > 0)
 	{
+		if (_kbhit() != 0 && _getch() == 27) break;
+
 		Record suffix = active.front();
 		active.pop();
 		if (suffix.code >= code_level_min)
