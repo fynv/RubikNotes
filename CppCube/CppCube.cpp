@@ -19,8 +19,9 @@
 #define MODE_DISCOVER 2
 #define MODE_PACK_BASEDATA 3
 #define MODE_STOCHASTIC_SEARCH 4
+#define MODE_DISCOVER_PLL_ONLY 5
 
-#define MODE MODE_DISCOVER
+#define MODE MODE_DISCOVER_PLL_ONLY
 
 using json = nlohmann::json;
 
@@ -993,6 +994,249 @@ int main()
 		fclose(fp);
 	}
 		
+
+	return 0;
+}
+#endif
+
+#if MODE == MODE_DISCOVER_PLL_ONLY
+int main()
+{
+	RubiksCube::s_Initialize();
+
+	printf("Calculating PLL cases\n");
+
+	std::string pll_seqs[] =
+	{
+		"",
+		"(L'UR'U2)(LU'L'U2)(LRU')",
+		"(RU'LU2)(R'URU2)(R'L'U)",
+		"z'(UL'UL)(ULUL')(U'L'U2)z",
+		"z(U'RU'R')(U'R'U'R)(URU2)z'",
+		"(RU2)(R'U2)(RB'R'U')(RURBR'2U)",
+		"(L'U2)(LU2)(L'BLU)(L'U'L'B'L2U')",
+		"(r'2R2U)(r'2R2U2)(r'2R2U)(r'2R2)",
+		"(R'U')(R'FRF')(UR)b'(R'U'RU)b",
+		"x'R2D2(R'U'R)D2(R'UR')x",
+		"(lU'R)D2(R'UR)D2R'2x",
+		"x'(RU'R'D)(RUR'D')RUR'z'(RU)(L'U'R')zx",
+		"(R'U'RU)(RB'R'2U)(RUR'U')(RB)",
+		"B'(R'URUR'U')(RB)(R'U'RU)(RB'R'B)",
+		"(U'R'U)(RU'R'l')d'(R'UR)y'(RUR'U'R2)x'",
+		"(R'Ul'f')'x(R'Ul'f')U2(R'U'RUR)x",
+		"(L'UR'U2)(LU'L')(RUR'U2)(LU'RU')",
+		"(RU'LU2)(R'UR)(L'U'LU2)(R'UL'U)",
+		"(RUR')y'(R2u'RU')(R'UR'uR'2)y",
+		"y'(R2u'RU'R)(UR'uR'2)y(RU'R')",
+		"(L'U'L)y'(R'2uR'U)(RU'Ru'R2)y",
+		"y'(R'2uR'UR')(U'Ru'R2)y(L'UL)"
+	};
+
+	int count_pll_seqs = (int)(sizeof(pll_seqs) / sizeof(std::string));
+
+	std::vector<RubiksCube> pll_lst;
+	
+	{
+		std::unordered_map<uint64_t, RubiksCube> collection;
+		for (int i = 0; i < count_pll_seqs; i++)
+		{
+			RubiksCube cube_pll;
+			cube_pll.exec_seq(pll_seqs[i], true);
+
+			RubiksCube cube_mod;
+
+			for (int j = 0; j < 4; j++)
+			{
+				RubiksCube cube = cube_mod;
+				cube *= cube_pll;
+
+				for (int k = 0; k < 4; k++)
+				{
+					uint64_t hs = crc64(0, cube.map, 54);
+					auto iter = collection.find(hs);
+					if (iter == collection.end())
+					{
+						collection[hs] = cube;
+						pll_lst.push_back(cube);
+					}
+					cube *= RubiksCube::s_UCW;
+				}
+				cube_mod *= RubiksCube::s_UCW;
+			}
+		}
+	}
+
+	size_t found_pll = 0;
+
+	printf("Loading prefixes\n");
+
+
+	const RubiksCube* ops[] =
+	{
+		&RubiksCube::s_cube_o,
+		&RubiksCube::s_RCW,
+		&RubiksCube::s_RCCW,
+		&RubiksCube::s_LCW,
+		&RubiksCube::s_LCCW,
+		&RubiksCube::s_UCW,
+		&RubiksCube::s_UCCW,
+		&RubiksCube::s_DCW,
+		&RubiksCube::s_DCCW,
+		&RubiksCube::s_FCW,
+		&RubiksCube::s_FCCW,
+		&RubiksCube::s_BCW,
+		&RubiksCube::s_BCCW
+	};
+
+	std::unordered_map<uint64_t, uint64_t> prefix_map;
+	{
+		FILE* fp = fopen("Records_8.dat", "rb");
+		fseek(fp, 0, SEEK_END);
+		size_t len = ftell(fp);
+		fseek(fp, 0, SEEK_SET);
+		while (ftell(fp) < len)
+		{
+			uint64_t hs, code;
+			fread(&hs, sizeof(uint64_t), 1, fp);
+			fread(&code, sizeof(uint64_t), 1, fp);
+			prefix_map[hs] = code;
+		}
+		fclose(fp);
+	}
+
+	std::vector<std::vector<uint8_t>> opt_seqs_pll(pll_lst.size());
+
+	struct Record
+	{
+		uint64_t code;
+		RubiksCube state;
+	};
+
+	std::unordered_set<uint64_t> reached;
+	std::queue<Record> active;
+
+	uint64_t hs = crc64(0, RubiksCube::s_cube_o.map, 54);
+	uint64_t code = 0;
+	reached.insert(hs);
+	active.push({ code, RubiksCube::s_cube_o });
+
+	printf("Scanning, sub-8 moves\n");
+	for (size_t j = 0; j < pll_lst.size(); j++)
+	{
+		RubiksCube cube_dst = pll_lst[j];
+		uint64_t hs = crc64(0, cube_dst.map, 54);
+		auto iter = prefix_map.find(hs);
+		if (iter != prefix_map.end())
+		{
+			auto seq = decode_seq(iter->second);
+			reverse_seq(seq);
+			if (seq.size() < 1 || seq[0] == 5 || seq[0] == 6)
+			{
+				opt_seqs_pll[j] = { 0 };
+			}
+			else
+			{
+				opt_seqs_pll[j] = seq;
+				std::string str = seq2str(seq);
+				printf("pll %d: %s\n", j, str.c_str());
+			}
+			found_pll++;
+		}
+	}
+
+	bool done = false;
+	int level = 0;
+	int code_level_min = 0;
+	while (active.size() > 0)
+	{
+		Record suffix = active.front();
+		active.pop();
+		if (suffix.code >= code_level_min)
+		{
+			level++;
+			code_level_min = code_level_min * 13 + 1;
+			printf("Scanning, %d moves.\n", 8 + level);
+		}
+		for (int id = 1; id < 13; id++)
+		{
+			uint64_t code = id + suffix.code * 13;
+			RubiksCube cube = *ops[id];
+			cube *= suffix.state;
+
+			hs = crc64(0, cube.map, 54);
+			auto iter = reached.find(hs);
+			if (iter == reached.end())
+			{
+				reached.insert(hs);
+				active.push({ code, cube });
+
+				for (size_t j = 0; j < pll_lst.size(); j++)
+				{
+					if (opt_seqs_pll[j].size() > 0) continue;
+					RubiksCube cube_dst = pll_lst[j];
+					cube_dst *= cube;
+					uint64_t hs = crc64(0, cube_dst.map, 54);
+					auto iter = prefix_map.find(hs);
+					if (iter != prefix_map.end())
+					{
+						auto suffix = decode_seq(code);
+						auto seq = decode_seq(iter->second);
+						if (seq.size() < 1 || suffix[0] == 5 || suffix[0] == 6)
+						{
+							opt_seqs_pll[j] = { 0 };
+						}
+						else
+						{
+							reverse_seq(seq);
+							suffix.insert(suffix.end(), seq.begin(), seq.end());
+							opt_seqs_pll[j] = suffix;
+							std::string str = seq2str(suffix);
+							printf("pll %d: %s\n", j, str.c_str());							
+						}
+						found_pll++;
+						printf("pll: %zu/%zu\n", found_pll, pll_lst.size());
+						if (found_pll >= pll_lst.size())
+						{
+							done = true;
+							break;
+						}
+					}
+				}
+				if (done)
+				{
+					break;
+				}
+			}
+		}
+		if (done)
+		{
+			break;
+		}
+	}
+
+	struct compare {
+		inline bool operator()(const std::vector<uint8_t>& first,
+			const std::vector<uint8_t>& second) const
+		{
+			return first.size() < second.size();
+		}
+	} c;
+
+	{
+		FILE* fp = fopen("found_pll.txt", "w");
+		std::sort(opt_seqs_pll.begin(), opt_seqs_pll.end(), c);
+		for (size_t j = 0; j < opt_seqs_pll.size(); j++)
+		{
+			if (opt_seqs_pll[j].size() > 0 && opt_seqs_pll[j][0] > 0)
+			{
+				std::string str = seq2str(opt_seqs_pll[j]);
+				fprintf(fp, "%s\n", str.c_str());
+			}
+		}
+		fprintf(fp, "\n");
+		fclose(fp);
+	}
+
 
 	return 0;
 }
