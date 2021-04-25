@@ -1,10 +1,15 @@
-# OLL/PLL algorithm discovering
+# OLL/PLL Algorithm Discovering
 
-This C++ program enumerates each of all OLL/PLL algorithms that ends with R or R' and doesn't start with U or U'. The program uses a Bidirectional BFS algorithm.
+This C++ program enumerates each of all "optimal-moves" OLL/PLL algorithms that ends with R or R'.
+The program uses a Bidirectional BFS algorithm.
 
-## Usage
+## OLL Algorithm Discovering
+1. Run [PrepareOLL.exe](PrepareOLL.exe) for forward searching, which generates OLL8.dat.
+2. Run [DiscoverOLL.exe](DiscoverOLL.exe) for backward searching, which generates [found_oll.txt](found_oll.txt)
 
-1. Run [Prepare.exe](Prepare.exe) for forward searching, which generates "Records_8.dat".
-2. Run [Discover.exe](Discover.exe) for backward searching. 
-The program can be stopped at anytime by pressing ESC. The OLL/PLL algorithms discovered by the time of stopping will be recorded into found_seqs.txt. [found_seqs.txt](found_seqs.txt) in this repo is an incomplete one.
+## PLL Algorithm Discovering
+1. Run [PreparePLL.exe](PreparePLL.exe) for forward searching, which generates PLL8.dat.
+2. Run [DiscoverPLL.exe](DiscoverPLL.exe) for backward searching, which generates [found_pll.txt](found_pll.txt)
+
+The program can be stopped at anytime by pressing "ESC", which will end with an incomplete result file.
 

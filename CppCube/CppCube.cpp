@@ -11,17 +11,22 @@
 #include <queue>
 #include <fstream>
 #include <conio.h>
-#include "base_data.hpp"
 #include "crc64.h"
 #include "json.hpp"
 
-#define MODE_PREPARE 1
-#define MODE_DISCOVER 2
-#define MODE_PACK_BASEDATA 3
-#define MODE_STOCHASTIC_SEARCH 4
-#define MODE_DISCOVER_PLL_ONLY 5
+#define MODE_PACK_BASEDATA 1
+#define MODE_STOCHASTIC_SEARCH 100
 
-#define MODE MODE_DISCOVER_PLL_ONLY
+#define MODE_PLL_PREPARE 2
+#define MODE_PLL_DISCOVER 3
+
+#define MODE_OLL_PREPARE 4
+#define MODE_OLL_DISCOVER 5
+
+#define MODE MODE_PLL_DISCOVER
+
+#if MODE!=MODE_PACK_BASEDATA
+#include "base_data.hpp"
 
 using json = nlohmann::json;
 
@@ -112,6 +117,41 @@ public:
 			if (include_dirs && dirs[i] != b.dirs[i]) return false;
 		}
 		return true;
+	}
+
+	uint64_t hash() const
+	{
+		return crc64(0, map, 54);
+	}
+
+	uint64_t hash_oll() const
+	{
+		uint8_t tmp[54];
+		for (int i = 0; i < 54; i++)
+		{
+			uint8_t v = map[i];
+			uint8_t x = v / 9;
+			uint8_t y = v % 9;
+			if (x == 2)
+			{
+				if (y == 0 || y == 2 || y == 6 || y == 8)
+				{
+					v = (uint8_t)(-1);
+				}
+				else if (y == 1 || y == 3 || y == 5 || y == 7)
+				{
+					v = (uint8_t)(-2);
+				}
+			}
+			else if (x == 0 || x == 1 || x == 4 || x == 5)
+			{
+				if (y == 0) v = (uint8_t)(-4);
+				if (y == 1) v = (uint8_t)(-5);
+				if (y == 2) v = (uint8_t)(-3);
+			}
+			tmp[i] = v;
+		}
+		return crc64(0, tmp, 54);
 	}
 
 	void print()
@@ -483,7 +523,48 @@ std::string seq2str(const std::vector<uint8_t>& seq)
 	return str;
 }
 
-#if MODE == MODE_PREPARE
+std::unordered_set<int> get_avoid_ids(int id)
+{
+	std::unordered_set<int> ret;
+	if (id <= 0) return ret;
+	id--;
+	if (id % 2 == 0)
+	{
+		ret.insert(id + 1);
+	}
+	if (id % 4 < 2)
+	{
+		int g = id / 4 * 4 + 1;
+		ret.insert(g + 2);
+		ret.insert(g + 3);
+	}
+	
+	return ret;
+}
+
+std::unordered_set<int> get_avoid_ids2(int id)
+{
+	std::unordered_set<int> ret;
+	if (id <= 0) return ret;
+	id--;
+	if (id % 2 == 1)
+	{
+		ret.insert(id + 1);
+	}
+	if (id % 4 >= 2)
+	{
+		int g = id / 4 * 4 + 1;
+		ret.insert(g);
+		ret.insert(g + 1);
+	}
+	
+	return ret;
+
+}
+
+#endif // MODE!=MODE_PACK_BASEDATA
+
+#if MODE == MODE_PLL_PREPARE
 int main()
 {
 	RubiksCube::s_Initialize();
@@ -511,25 +592,23 @@ int main()
 		RubiksCube state;
 	};
 
-	std::unordered_set<uint64_t> reached;
+	std::unordered_map<uint64_t, uint64_t> reached;
 	std::queue<Record> active;
 
-	FILE* fp = fopen("Records_8.dat", "wb");
+	FILE* fp = fopen("PLL8.dat", "wb");
 
-	uint64_t hs = crc64(0, RubiksCube::s_cube_o.map, 54);
+	uint64_t hs = RubiksCube::s_cube_o.hash();
 	uint64_t code = 0;
-	reached.insert(hs);
+	reached[hs] = 0;
 	active.push({ code, RubiksCube::s_cube_o });
-	fwrite(&hs, sizeof(uint64_t), 1, fp);
-	fwrite(&code, sizeof(uint64_t), 1, fp);
 
 	int max_level = 8;
 	int level = 0;
-	int code_level_min = 0;	
+	int code_level_min = 0;
 
 	while (active.size() > 0)
 	{
-		Record suffix = active.front();						
+		Record suffix = active.front();
 		active.pop();
 		if (suffix.code >= code_level_min)
 		{
@@ -539,74 +618,379 @@ int main()
 		}
 
 		bool is_last = level == max_level;
-		
+
+		auto avoid_ids = get_avoid_ids(suffix.code%13);
+
 		int max_id = is_last ? 3 : 13;
-		for (int id = 1; id < max_id; id++)
+		for (int id = max_id-1; id>0; id--)
 		{
+			if (avoid_ids.find(id)!=avoid_ids.end()) continue;
+
 			uint64_t code = id + suffix.code * 13;
 			RubiksCube cube = *ops[id];
 			cube *= suffix.state;
 
-			hs = crc64(0, cube.map, 54);
+			hs = cube.hash();		
 			auto iter = reached.find(hs);
-			if (iter == reached.end())
+			if (iter == reached.end() || iter->second==level)
 			{
-				reached.insert(hs);
-				if (id < 3)
+				if (!is_last)
+				{
+					reached[hs] = level;
+					active.push({ code, cube });
+				}
+				if (is_last)
 				{
 					fwrite(&hs, sizeof(uint64_t), 1, fp);
 					fwrite(&code, sizeof(uint64_t), 1, fp);
 				}
+				
+			}
+		}
+	}
+
+	fclose(fp);
+
+	return 0;
+}
+
+#endif 
+
+#if MODE == MODE_PLL_DISCOVER
+int main()
+{
+	RubiksCube::s_Initialize();
+	printf("Calculating PLL cases\n");
+
+	std::string pll_seqs[] =
+	{
+		"z'(UL'UL)(ULUL')(U'L'U2)z",
+		"z(U'RU'R')(U'R'U'R)(URU2)z'",
+		"(r'2R2U)(r'2R2U2)(r'2R2U)(r'2R2)",
+		"(R'U')(R'FRF')(UR)b'(R'U'RU)b",
+
+		"x'R2D2(R'U'R)D2(R'UR')x",
+		"(lU'R)D2(R'UR)D2R'2x",
+		"x'(RU'R'D)(RUR'D')RUR'z'(RU)(L'U'R')zx",
+
+		"(R'U'RU)(RB'R'2U)(RUR'U')(RB)",
+		"(R'U)(RU'R'l')d'(R'UR)y'(RUR'U'R2)x'",
+		"(R'Ul'f')'x(R'Ul'f')U2(R'U'RUR)x",
+		"B'(R'URUR'U')(RB)(R'U'RU)(RB'R'B)",
+
+		"(L'UR'U2)(LU'L'U2)(LRU')",
+		"(RU'LU2)(R'URU2)(R'L'U)",
+		"(L'U2)(LU2)(L'BLU)(L'U'L'B'L2U')",
+		"(RU2)(R'U2)(RB'R'U')(RURBR'2U)",
+
+		"y'(R2u'RU'R)(UR'uR'2)y(RU'R')",
+		"(RUR')y'(R2u'RU')(R'UR'uR'2)y",
+		"y'(R'2uR'UR')(U'Ru'R2)y(L'UL)",
+		"(L'U'L)y'(R'2uR'U)(RU'Ru'R2)y",
+
+		"(RU'LU2)(R'UR)(L'U'LU2)(R'UL')",
+		"(L'UR'U2)(LU'L')(RUR'U2)(LU'R)",
+	};
+
+	int count_pll_seqs = (int)(sizeof(pll_seqs) / sizeof(std::string));
+
+	std::vector<std::vector<RubiksCube>> pll_lsts(count_pll_seqs);
+
+	{
+		std::unordered_map<uint64_t, RubiksCube> collection;
+		for (int i = 0; i < count_pll_seqs; i++)
+		{
+			RubiksCube cube_pll;
+			cube_pll.exec_seq(pll_seqs[i], true);
+
+			RubiksCube cube_mod;
+			for (int j = 0; j < 4; j++)
+			{
+				RubiksCube cube = cube_mod;
+				cube *= cube_pll;
+				cube /= cube_mod;
+
+				uint64_t hs = cube.hash();
+				auto iter = collection.find(hs);
+				if (iter == collection.end())
+				{
+					collection[hs] = cube;
+					pll_lsts[i].push_back(cube);
+				}				
+				cube_mod *= RubiksCube::s_UCW;
+			}
+		}
+	}
+
+	size_t found_pll = 0;
+
+	printf("Loading prefixes\n");
+
+	const RubiksCube* ops[] =
+	{
+		&RubiksCube::s_cube_o,
+		&RubiksCube::s_RCW,
+		&RubiksCube::s_RCCW,
+		&RubiksCube::s_LCW,
+		&RubiksCube::s_LCCW,
+		&RubiksCube::s_UCW,
+		&RubiksCube::s_UCCW,
+		&RubiksCube::s_DCW,
+		&RubiksCube::s_DCCW,
+		&RubiksCube::s_FCW,
+		&RubiksCube::s_FCCW,
+		&RubiksCube::s_BCW,
+		&RubiksCube::s_BCCW
+	};
+
+	std::unordered_map<uint64_t, std::vector<uint64_t>> prefix_map;
+	{
+		FILE* fp = fopen("PLL8.dat", "rb");
+		fseek(fp, 0, SEEK_END);
+		size_t len = ftell(fp);
+		fseek(fp, 0, SEEK_SET);
+		while (ftell(fp) < len)
+		{
+			uint64_t hs, code;
+			fread(&hs, sizeof(uint64_t), 1, fp);
+			fread(&code, sizeof(uint64_t), 1, fp);
+			prefix_map[hs].push_back(code);
+		}
+		fclose(fp);
+	}
+
+	std::vector<int> pll_level(count_pll_seqs, INT_MAX);
+	std::vector<std::vector<std::vector<uint8_t>>> opt_seqs_pll(count_pll_seqs);
+
+	struct Record
+	{
+		uint64_t code;
+		RubiksCube state;
+	};
+	
+	std::unordered_map<uint64_t, uint64_t> reached;
+	std::queue<Record> active;
+
+	uint64_t hs = RubiksCube::s_cube_o.hash();
+	uint64_t code = 0;
+	reached[hs] = 0;
+	active.push({ code, RubiksCube::s_cube_o });
+
+	int max_level = 8;
+	int level = 0;
+	int code_level_min = 0;
+	while (active.size() > 0)
+	{
+		if (_kbhit() != 0 && _getch() == 27) break;
+
+		Record suffix = active.front();
+		active.pop();
+		if (suffix.code >= code_level_min)
+		{
+			if (found_pll == count_pll_seqs) break;
+			level++;			
+			code_level_min = code_level_min * 13 + 1;
+			printf("Scanning, %d moves.\n", 8 + level);
+		}
+
+		bool is_last = level == max_level;
+
+		auto avoid_ids = get_avoid_ids2(suffix.code%13);
+
+		for (int id = 1; id < 13; id++)
+		{
+			if (avoid_ids.find(id) != avoid_ids.end()) continue;
+
+			uint64_t code = id + suffix.code * 13;
+			RubiksCube cube = *ops[id];
+			cube *= suffix.state;
+
+			hs = cube.hash();
+			auto iter = reached.find(hs);
+			if (iter == reached.end() || iter->second == level)
+			{
 				if (!is_last)
 				{
+					reached[hs] = level;
 					active.push({ code, cube });
 				}
-			}
 
+				bool has_found = false;
+				for (int i = 0; i < count_pll_seqs; i++)
+				{
+					if (pll_level[i] < level) continue;
+
+					std::vector<RubiksCube>& sub_lst = pll_lsts[i];
+					for (size_t j = 0; j < sub_lst.size(); j++)
+					{
+						RubiksCube cube_dst = sub_lst[j];
+						cube_dst *= cube;
+						hs = cube_dst.hash();
+						auto iter2 = prefix_map.find(hs);
+						if (iter2 != prefix_map.end())
+						{
+							std::vector<uint8_t> suffix = decode_seq(code);
+							const std::vector<uint64_t>& prefixes = iter2->second;
+							for (size_t k = 0; k < prefixes.size(); k++)
+							{
+								std::vector<uint8_t> prefix = decode_seq(prefixes[k]);
+								reverse_seq(prefix);
+								auto avoid_id2 = get_avoid_ids2((int)prefix[0]);
+								if (avoid_id2.find((int)suffix[suffix.size() - 1]) != avoid_id2.end()) continue;
+								std::vector<uint8_t> suffix_cpy = suffix;
+								suffix_cpy.insert(suffix_cpy.end(), prefix.begin(), prefix.end());
+								opt_seqs_pll[i].push_back(suffix_cpy);
+								std::string str = seq2str(suffix_cpy);
+								printf("pll %d: %s\n", i + 1, str.c_str());
+							}
+
+							if (pll_level[i] > level)
+							{
+								pll_level[i] = level;
+								found_pll++;
+								has_found = true;
+							}							
+						}
+					}
+				}
+				if (has_found)
+				{
+					printf("%zu/%zu\n", found_pll, count_pll_seqs);
+				}
+			}
 		}
-	}	
-	fclose(fp);
+	}
+
+	
+	{
+		FILE* fp = fopen("found_pll.txt", "w");
+
+		for (int i = 0; i < count_pll_seqs; i++)
+		{
+			fprintf(fp, "PLL %d:\n", i + 1);
+			std::vector<std::vector<uint8_t>>& sub_lst_seq = opt_seqs_pll[i];		
+			for (size_t j = 0; j < sub_lst_seq.size(); j++)
+			{
+				std::string str = seq2str(sub_lst_seq[j]);
+				fprintf(fp, "%s\n", str.c_str());
+			}
+			fprintf(fp, "\n");
+		}
+
+		fclose(fp);
+	}
 
 	return 0;
 }
 
 #endif
 
-
-#if MODE == MODE_DISCOVER
+#if MODE == MODE_OLL_PREPARE
 int main()
 {
 	RubiksCube::s_Initialize();
 
-	printf("Calculating OLL/PLL cases\n");
-
-	std::string pll_seqs[] =
+	const RubiksCube* ops[] =
 	{
-		"",
-		"(L'UR'U2)(LU'L'U2)(LRU')",
-		"(RU'LU2)(R'URU2)(R'L'U)",
-		"z'(UL'UL)(ULUL')(U'L'U2)z",
-		"z(U'RU'R')(U'R'U'R)(URU2)z'",	
-		"(RU2)(R'U2)(RB'R'U')(RURBR'2U)",
-		"(L'U2)(LU2)(L'BLU)(L'U'L'B'L2U')",
-		"(r'2R2U)(r'2R2U2)(r'2R2U)(r'2R2)",
-		"(R'U')(R'FRF')(UR)b'(R'U'RU)b",
-		"x'R2D2(R'U'R)D2(R'UR')x",
-		"(lU'R)D2(R'UR)D2R'2x",
-		"x'(RU'R'D)(RUR'D')RUR'z'(RU)(L'U'R')zx",
-		"(R'U'RU)(RB'R'2U)(RUR'U')(RB)",
-		"B'(R'URUR'U')(RB)(R'U'RU)(RB'R'B)",
-		"(U'R'U)(RU'R'l')d'(R'UR)y'(RUR'U'R2)x'",
-		"(R'Ul'f')'x(R'Ul'f')U2(R'U'RUR)x",
-		"(L'UR'U2)(LU'L')(RUR'U2)(LU'RU')",
-		"(RU'LU2)(R'UR)(L'U'LU2)(R'UL'U)",
-		"(RUR')y'(R2u'RU')(R'UR'uR'2)y",
-		"y'(R2u'RU'R)(UR'uR'2)y(RU'R')",
-		"(L'U'L)y'(R'2uR'U)(RU'Ru'R2)y",
-		"y'(R'2uR'UR')(U'Ru'R2)y(L'UL)"
+		&RubiksCube::s_cube_o,
+		&RubiksCube::s_RCW,
+		&RubiksCube::s_RCCW,
+		&RubiksCube::s_LCW,
+		&RubiksCube::s_LCCW,
+		&RubiksCube::s_UCW,
+		&RubiksCube::s_UCCW,
+		&RubiksCube::s_DCW,
+		&RubiksCube::s_DCCW,
+		&RubiksCube::s_FCW,
+		&RubiksCube::s_FCCW,
+		&RubiksCube::s_BCW,
+		&RubiksCube::s_BCCW
 	};
 
-	int count_pll_seqs = (int)(sizeof(pll_seqs) / sizeof(std::string));
+	struct Record
+	{
+		uint64_t code;
+		RubiksCube state;
+	};
+
+	std::unordered_map<uint64_t, uint64_t> reached;
+	std::unordered_map<uint64_t, uint64_t> level_map;	
+	std::queue<Record> active;
+
+	FILE* fp = fopen("OLL8.dat", "wb");
+
+	uint64_t hs = RubiksCube::s_cube_o.hash();
+	uint64_t hs_oll = RubiksCube::s_cube_o.hash_oll();
+	uint64_t code = 0;
+	reached[hs] = 0;
+	level_map[hs_oll] = 0;
+	active.push({ code, RubiksCube::s_cube_o });	
+
+	int max_level = 8;
+	int level = 0;
+	int code_level_min = 0;
+
+	while (active.size() > 0)
+	{
+		Record suffix = active.front();
+		active.pop();
+		if (suffix.code >= code_level_min)
+		{
+			level++;
+			code_level_min = code_level_min * 13 + 1;
+			printf("Scanning level %d.\n", level);
+		}
+
+		bool is_last = level == max_level;
+		auto avoid_ids = get_avoid_ids(suffix.code % 13);
+
+		int max_id = is_last ? 3 : 13;
+		for (int id = max_id-1; id>0; id--)
+		{
+			if (avoid_ids.find(id) != avoid_ids.end()) continue;			
+
+			uint64_t code = id + suffix.code * 13;
+			RubiksCube cube = *ops[id];
+			cube *= suffix.state;
+
+			hs = cube.hash();
+			hs_oll = cube.hash_oll();
+
+			auto iter = reached.find(hs);
+			if (iter == reached.end() || iter->second == level)
+			{
+				int cur_level = INT_MAX;
+				auto iter_l = level_map.find(hs_oll);
+				if (iter_l != level_map.end())
+				{
+					cur_level = iter_l->second;
+				}
+				if (!is_last)
+				{
+					reached[hs] = level;
+					if (level < cur_level) level_map[hs_oll] = level;
+					active.push({ code, cube });
+				}
+				if (id < 3 && level <= cur_level)
+				{
+					fwrite(&hs_oll, sizeof(uint64_t), 1, fp);
+					fwrite(&code, sizeof(uint64_t), 1, fp);
+				}
+			}
+		}
+	}
+
+	fclose(fp);
+
+	return 0;
+}
+#endif
+
+#if MODE == MODE_OLL_DISCOVER
+int main()
+{
+	RubiksCube::s_Initialize();
+	printf("Calculating OLL cases\n");
 
 	std::string oll_seqs[] =
 	{
@@ -669,90 +1053,33 @@ int main()
 		"(R U R' U' r)(R' U)(R U' r')"
 	};
 
-	int count_oll_seqs = (int)(sizeof(oll_seqs) / sizeof(std::string));	
-	
-	std::vector<RubiksCube> pll_lst;
+	int count_oll_seqs = (int)(sizeof(oll_seqs) / sizeof(std::string));
 	std::vector<std::vector<RubiksCube>> oll_lsts(count_oll_seqs);
 
 	{
 		std::unordered_map<uint64_t, RubiksCube> collection;
-		for (int i = 0; i < count_pll_seqs; i++)
+		for (int i = 0; i < count_oll_seqs; i++)
 		{
-			RubiksCube cube_pll;
-			cube_pll.exec_seq(pll_seqs[i], true);
-
-			RubiksCube cube_mod;
+			RubiksCube cube;
+			cube.exec_seq(oll_seqs[i], true);
 
 			for (int j = 0; j < 4; j++)
 			{
-				RubiksCube cube = cube_mod;
-				cube *= cube_pll;
-
-				for (int k = 0; k < 4; k++)
+				uint64_t hs = cube.hash_oll();
+				auto iter = collection.find(hs);
+				if (iter == collection.end())
 				{
-					uint64_t hs = crc64(0, cube.map, 54);
-					auto iter = collection.find(hs);
-					if (iter == collection.end())
-					{
-						collection[hs] = cube;
-						pll_lst.push_back(cube);
-					}
-					cube *= RubiksCube::s_UCW;
+					collection[hs] = cube;
+					oll_lsts[i].push_back(cube);
 				}
-				cube_mod *= RubiksCube::s_UCW;
-			}
-		}
-
-		for (int i = 0; i < count_oll_seqs; i++)
-		{
-			for (size_t j = 0; j < pll_lst.size(); j++)
-			{
-				RubiksCube cube = pll_lst[j];
-				cube.exec_seq(oll_seqs[i], true);
-
-				for (int k = 0; k < 4; k++)
-				{
-					uint64_t hs = crc64(0, cube.map, 54);
-					auto iter = collection.find(hs);
-					if (iter == collection.end())
-					{
-						collection[hs] = cube;
-						oll_lsts[i].push_back(cube);
-					}
-					cube *= RubiksCube::s_UCW;
-				}
+				cube *= RubiksCube::s_UCW;
 			}
 		}
 	}
 
-#if 0
-	printf("%d\n", pll_lst.size());
-	RubiksCube::s_to_json(pll_lst.data(), (int)pll_lst.size(), "../../all_pll.json");
-
-	std::vector<RubiksCube> oll_v = pll_lst;
-	for (int i = 0; i < count_oll_seqs; i++)
-	{
-		std::vector<RubiksCube>& sub_lst = oll_lsts[i];
-		for (size_t j = 0; j < sub_lst.size(); j++)
-			oll_v.push_back(sub_lst[j]);
-	}
-
-	printf("%d\n", oll_v.size());
-	RubiksCube::s_to_json(oll_v.data(), (int)oll_v.size(), "../../all_oll.json");
-#endif
-
-	size_t count_oll = 0;
-	for (int i = 0; i < count_oll_seqs; i++)
-	{
-		std::vector<RubiksCube>& sub_lst = oll_lsts[i];
-		count_oll += sub_lst.size();
-	}
-
-	size_t found_pll = 0;
 	size_t found_oll = 0;
 
 	printf("Loading prefixes\n");
-	
 
 	const RubiksCube* ops[] =
 	{
@@ -770,10 +1097,10 @@ int main()
 		&RubiksCube::s_BCW,
 		&RubiksCube::s_BCCW
 	};
-	
-	std::unordered_map<uint64_t, uint64_t> prefix_map;
+
+	std::unordered_map<uint64_t, std::vector<uint64_t>> prefix_map;
 	{
-		FILE* fp = fopen("Records_8.dat", "rb");
+		FILE* fp = fopen("OLL8.dat", "rb");
 		fseek(fp, 0, SEEK_END);
 		size_t len = ftell(fp);
 		fseek(fp, 0, SEEK_SET);
@@ -782,18 +1109,13 @@ int main()
 			uint64_t hs, code;
 			fread(&hs, sizeof(uint64_t), 1, fp);
 			fread(&code, sizeof(uint64_t), 1, fp);
-			prefix_map[hs] = code;
+			prefix_map[hs].push_back(code);
 		}
 		fclose(fp);
 	}
 
-	std::vector<std::vector<uint8_t>> opt_seqs_pll(pll_lst.size());
+	std::vector<int> oll_level(count_oll_seqs, INT_MAX);
 	std::vector<std::vector<std::vector<uint8_t>>> opt_seqs_oll(count_oll_seqs);
-	for (int i = 0; i < count_oll_seqs; i++)
-	{
-		std::vector<RubiksCube>& sub_lst = oll_lsts[i];
-		opt_seqs_oll[i].resize(sub_lst.size());
-	}
 
 	struct Record
 	{
@@ -801,444 +1123,146 @@ int main()
 		RubiksCube state;
 	};
 
-	std::unordered_set<uint64_t> reached;
+	std::unordered_map<uint64_t, uint64_t> reached;
 	std::queue<Record> active;
 
-	uint64_t hs = crc64(0, RubiksCube::s_cube_o.map, 54);
+	uint64_t hs = RubiksCube::s_cube_o.hash();
 	uint64_t code = 0;
-	reached.insert(hs);
+	reached[hs];
 	active.push({ code, RubiksCube::s_cube_o });
 
 	printf("Scanning, sub-8 moves\n");
-	for (size_t j = 0; j < pll_lst.size(); j++)
-	{
-		RubiksCube cube_dst = pll_lst[j];
-		uint64_t hs = crc64(0, cube_dst.map, 54);
-		auto iter = prefix_map.find(hs);
-		if (iter != prefix_map.end())
-		{			
-			auto seq = decode_seq(iter->second);		
-			reverse_seq(seq);
-			if (seq.size()<1 || seq[0] == 5 || seq[0] == 6)
-			{
-				opt_seqs_pll[j] = { 0 };
-			}
-			else
-			{
-				opt_seqs_pll[j] = seq;
-				std::string str = seq2str(seq);
-				printf("pll %d: %s\n", j, str.c_str());
-			}
-			found_pll++;
-		}
-	}
 
 	for (int i = 0; i < count_oll_seqs; i++)
 	{
 		std::vector<RubiksCube>& sub_lst = oll_lsts[i];
-		std::vector<std::vector<uint8_t>>& sub_lst_seq = opt_seqs_oll[i];
 		for (size_t j = 0; j < sub_lst.size(); j++)
 		{
 			RubiksCube cube_dst = sub_lst[j];
-			uint64_t hs = crc64(0, cube_dst.map, 54);
-			auto iter = prefix_map.find(hs);
-			if (iter != prefix_map.end())
-			{				
-				auto seq = decode_seq(iter->second);
-				reverse_seq(seq);
-
-				if (seq.size() < 1 || seq[0] == 5 || seq[0] == 6)
+			hs = cube_dst.hash_oll();
+			auto iter2 = prefix_map.find(hs);
+			if (iter2 != prefix_map.end())
+			{
+				const std::vector<uint64_t>& prefixes = iter2->second;
+				for (size_t k = 0; k < prefixes.size(); k++)
 				{
-					sub_lst_seq[j] = { 0 };
-				}
-				else
-				{
-					sub_lst_seq[j] = seq;
-					std::string str = seq2str(seq);
+					std::vector<uint8_t> prefix = decode_seq(prefixes[k]);
+					reverse_seq(prefix);
+					opt_seqs_oll[i].push_back(prefix);
+					std::string str = seq2str(prefix);
 					printf("oll %d: %s\n", i + 1, str.c_str());
 				}
-				found_oll++;
+
+				if (oll_level[i] > 0)
+				{
+					oll_level[i] = 0;
+					found_oll++;
+				}
 			}
 		}
 	}
 
+	int max_level = 6;
 	int level = 0;
 	int code_level_min = 0;
 	while (active.size() > 0)
 	{
 		if (_kbhit() != 0 && _getch() == 27) break;
-		printf("pll: %zu/%zu oll:%zu/%zu\n", found_pll, pll_lst.size(), found_oll, count_oll);
-		
+
 		Record suffix = active.front();
 		active.pop();
 		if (suffix.code >= code_level_min)
 		{
+			if (found_oll == count_oll_seqs) break;
 			level++;
 			code_level_min = code_level_min * 13 + 1;
 			printf("Scanning, %d moves.\n", 8 + level);
 		}
+
+		bool is_last = level == max_level;
+		auto avoid_ids = get_avoid_ids2(suffix.code % 13);
+
 		for (int id = 1; id < 13; id++)
 		{
+			if (avoid_ids.find(id) != avoid_ids.end()) continue;
+
 			uint64_t code = id + suffix.code * 13;
 			RubiksCube cube = *ops[id];
 			cube *= suffix.state;
 
-			hs = crc64(0, cube.map, 54);
+			hs = cube.hash();
 			auto iter = reached.find(hs);
-			if (iter == reached.end())
+			if (iter == reached.end() || iter->second == level)
 			{
-				reached.insert(hs);				
-				active.push({ code, cube });				
-
-				for (size_t j = 0; j < pll_lst.size(); j++)
+				if (!is_last)
 				{
-					if (opt_seqs_pll[j].size()>0) continue;
-					RubiksCube cube_dst = pll_lst[j];
-					cube_dst *= cube;
-					uint64_t hs = crc64(0, cube_dst.map, 54);
-					auto iter = prefix_map.find(hs);
-					if (iter != prefix_map.end())
-					{
-						auto suffix = decode_seq(code);						
-						auto seq = decode_seq(iter->second);
-						if (seq.size() < 1 || suffix[0] == 5 || suffix[0] == 6)
-						{
-							opt_seqs_pll[j] = { 0 };
-						}
-						else
-						{
-							reverse_seq(seq);
-							suffix.insert(suffix.end(), seq.begin(), seq.end());
-							opt_seqs_pll[j] = suffix;
-							std::string str = seq2str(suffix);
-							printf("pll %d: %s\n", j, str.c_str());
-						}											
-						found_pll++;
-					}
+					reached[hs] = level;
+					active.push({ code, cube });
 				}
 
+				bool has_found = false;
 				for (int i = 0; i < count_oll_seqs; i++)
 				{
+					if (oll_level[i] < level) continue;
+
 					std::vector<RubiksCube>& sub_lst = oll_lsts[i];
-					std::vector<std::vector<uint8_t>>& sub_lst_seq = opt_seqs_oll[i];
 					for (size_t j = 0; j < sub_lst.size(); j++)
 					{
-						if (sub_lst_seq[j].size()>0) continue;
 						RubiksCube cube_dst = sub_lst[j];
-						cube_dst *= cube;						
-						uint64_t hs = crc64(0, cube_dst.map, 54);
-						auto iter = prefix_map.find(hs);
-						if (iter != prefix_map.end())
-						{													
-							auto suffix = decode_seq(code);
-							auto seq = decode_seq(iter->second);
-							if (seq.size() < 1 || suffix[0] == 5 || suffix[0] == 6)
+						cube_dst *= cube;
+						hs = cube_dst.hash_oll();
+						auto iter2 = prefix_map.find(hs);
+						if (iter2 != prefix_map.end())
+						{
+							std::vector<uint8_t> suffix = decode_seq(code);
+							const std::vector<uint64_t>& prefixes = iter2->second;
+							for (size_t k = 0; k < prefixes.size(); k++)
 							{
-								sub_lst_seq[j] = { 0 };
-							}
-							else
-							{
-								reverse_seq(seq);
-								suffix.insert(suffix.end(), seq.begin(), seq.end());
-								sub_lst_seq[j] = suffix;
-								std::string str = seq2str(suffix);
+								std::vector<uint8_t> prefix = decode_seq(prefixes[k]);
+								reverse_seq(prefix);
+								auto avoid_id2 = get_avoid_ids2((int)prefix[0]);
+								if (avoid_id2.find((int)suffix[suffix.size() - 1]) != avoid_id2.end()) continue;
+								std::vector<uint8_t> suffix_cpy = suffix;
+								suffix_cpy.insert(suffix_cpy.end(), prefix.begin(), prefix.end());
+								opt_seqs_oll[i].push_back(suffix_cpy);
+								std::string str = seq2str(suffix_cpy);
 								printf("oll %d: %s\n", i + 1, str.c_str());
 							}
-							found_oll++;
+
+							if (oll_level[i] > level)
+							{
+								oll_level[i] = level;
+								found_oll++;
+								has_found = true;
+							}
 						}
 					}
+				}
+				if (has_found)
+				{
+					printf("%zu/%zu\n", found_oll, count_oll_seqs);
 				}
 			}
 		}
 	}
 
-	struct compare {
-		inline bool operator()(const std::vector<uint8_t>& first,
-			const std::vector<uint8_t>& second) const
-		{
-			return first.size() < second.size();
-		}
-	} c;	
-
 	{
-		FILE* fp = fopen("found_seqs.txt", "w");
-
-		fprintf(fp, "PLL:\n");
-		std::sort(opt_seqs_pll.begin(), opt_seqs_pll.end(), c);
-		for (size_t j = 0; j < opt_seqs_pll.size(); j++)
-		{
-			if (opt_seqs_pll[j].size()>0 && opt_seqs_pll[j][0]>0)
-			{				
-				std::string str = seq2str(opt_seqs_pll[j]);
-				fprintf(fp, "%s\n", str.c_str());
-			}
-		}
-		fprintf(fp, "\n");
+		FILE* fp = fopen("found_oll.txt", "w");
 
 		for (int i = 0; i < count_oll_seqs; i++)
 		{
 			fprintf(fp, "OLL %d:\n", i + 1);
 			std::vector<std::vector<uint8_t>>& sub_lst_seq = opt_seqs_oll[i];
-			std::sort(sub_lst_seq.begin(), sub_lst_seq.end(), c);
 			for (size_t j = 0; j < sub_lst_seq.size(); j++)
 			{
-				if (sub_lst_seq[j].size()>0 && sub_lst_seq[j][0]>0)
-				{
-					std::string str = seq2str(sub_lst_seq[j]);
-					fprintf(fp, "%s\n", str.c_str());
-				}
+				std::string str = seq2str(sub_lst_seq[j]);
+				fprintf(fp, "%s\n", str.c_str());
 			}
 			fprintf(fp, "\n");
 		}
 
 		fclose(fp);
 	}
-		
-
-	return 0;
-}
-#endif
-
-#if MODE == MODE_DISCOVER_PLL_ONLY
-int main()
-{
-	RubiksCube::s_Initialize();
-
-	printf("Calculating PLL cases\n");
-
-	std::string pll_seqs[] =
-	{
-		"",
-		"(L'UR'U2)(LU'L'U2)(LRU')",
-		"(RU'LU2)(R'URU2)(R'L'U)",
-		"z'(UL'UL)(ULUL')(U'L'U2)z",
-		"z(U'RU'R')(U'R'U'R)(URU2)z'",
-		"(RU2)(R'U2)(RB'R'U')(RURBR'2U)",
-		"(L'U2)(LU2)(L'BLU)(L'U'L'B'L2U')",
-		"(r'2R2U)(r'2R2U2)(r'2R2U)(r'2R2)",
-		"(R'U')(R'FRF')(UR)b'(R'U'RU)b",
-		"x'R2D2(R'U'R)D2(R'UR')x",
-		"(lU'R)D2(R'UR)D2R'2x",
-		"x'(RU'R'D)(RUR'D')RUR'z'(RU)(L'U'R')zx",
-		"(R'U'RU)(RB'R'2U)(RUR'U')(RB)",
-		"B'(R'URUR'U')(RB)(R'U'RU)(RB'R'B)",
-		"(U'R'U)(RU'R'l')d'(R'UR)y'(RUR'U'R2)x'",
-		"(R'Ul'f')'x(R'Ul'f')U2(R'U'RUR)x",
-		"(L'UR'U2)(LU'L')(RUR'U2)(LU'RU')",
-		"(RU'LU2)(R'UR)(L'U'LU2)(R'UL'U)",
-		"(RUR')y'(R2u'RU')(R'UR'uR'2)y",
-		"y'(R2u'RU'R)(UR'uR'2)y(RU'R')",
-		"(L'U'L)y'(R'2uR'U)(RU'Ru'R2)y",
-		"y'(R'2uR'UR')(U'Ru'R2)y(L'UL)"
-	};
-
-	int count_pll_seqs = (int)(sizeof(pll_seqs) / sizeof(std::string));
-
-	std::vector<RubiksCube> pll_lst;
-	
-	{
-		std::unordered_map<uint64_t, RubiksCube> collection;
-		for (int i = 0; i < count_pll_seqs; i++)
-		{
-			RubiksCube cube_pll;
-			cube_pll.exec_seq(pll_seqs[i], true);
-
-			RubiksCube cube_mod;
-
-			for (int j = 0; j < 4; j++)
-			{
-				RubiksCube cube = cube_mod;
-				cube *= cube_pll;
-
-				for (int k = 0; k < 4; k++)
-				{
-					uint64_t hs = crc64(0, cube.map, 54);
-					auto iter = collection.find(hs);
-					if (iter == collection.end())
-					{
-						collection[hs] = cube;
-						pll_lst.push_back(cube);
-					}
-					cube *= RubiksCube::s_UCW;
-				}
-				cube_mod *= RubiksCube::s_UCW;
-			}
-		}
-	}
-
-	size_t found_pll = 0;
-
-	printf("Loading prefixes\n");
-
-
-	const RubiksCube* ops[] =
-	{
-		&RubiksCube::s_cube_o,
-		&RubiksCube::s_RCW,
-		&RubiksCube::s_RCCW,
-		&RubiksCube::s_LCW,
-		&RubiksCube::s_LCCW,
-		&RubiksCube::s_UCW,
-		&RubiksCube::s_UCCW,
-		&RubiksCube::s_DCW,
-		&RubiksCube::s_DCCW,
-		&RubiksCube::s_FCW,
-		&RubiksCube::s_FCCW,
-		&RubiksCube::s_BCW,
-		&RubiksCube::s_BCCW
-	};
-
-	std::unordered_map<uint64_t, uint64_t> prefix_map;
-	{
-		FILE* fp = fopen("Records_8.dat", "rb");
-		fseek(fp, 0, SEEK_END);
-		size_t len = ftell(fp);
-		fseek(fp, 0, SEEK_SET);
-		while (ftell(fp) < len)
-		{
-			uint64_t hs, code;
-			fread(&hs, sizeof(uint64_t), 1, fp);
-			fread(&code, sizeof(uint64_t), 1, fp);
-			prefix_map[hs] = code;
-		}
-		fclose(fp);
-	}
-
-	std::vector<std::vector<uint8_t>> opt_seqs_pll(pll_lst.size());
-
-	struct Record
-	{
-		uint64_t code;
-		RubiksCube state;
-	};
-
-	std::unordered_set<uint64_t> reached;
-	std::queue<Record> active;
-
-	uint64_t hs = crc64(0, RubiksCube::s_cube_o.map, 54);
-	uint64_t code = 0;
-	reached.insert(hs);
-	active.push({ code, RubiksCube::s_cube_o });
-
-	printf("Scanning, sub-8 moves\n");
-	for (size_t j = 0; j < pll_lst.size(); j++)
-	{
-		RubiksCube cube_dst = pll_lst[j];
-		uint64_t hs = crc64(0, cube_dst.map, 54);
-		auto iter = prefix_map.find(hs);
-		if (iter != prefix_map.end())
-		{
-			auto seq = decode_seq(iter->second);
-			reverse_seq(seq);
-			if (seq.size() < 1 || seq[0] == 5 || seq[0] == 6)
-			{
-				opt_seqs_pll[j] = { 0 };
-			}
-			else
-			{
-				opt_seqs_pll[j] = seq;
-				std::string str = seq2str(seq);
-				printf("pll %d: %s\n", j, str.c_str());
-			}
-			found_pll++;
-		}
-	}
-
-	bool done = false;
-	int level = 0;
-	int code_level_min = 0;
-	while (active.size() > 0)
-	{
-		if (_kbhit() != 0 && _getch() == 27) break;
-
-		Record suffix = active.front();
-		active.pop();
-		if (suffix.code >= code_level_min)
-		{
-			level++;
-			code_level_min = code_level_min * 13 + 1;
-			printf("Scanning, %d moves.\n", 8 + level);
-		}
-		for (int id = 1; id < 13; id++)
-		{
-			uint64_t code = id + suffix.code * 13;
-			RubiksCube cube = *ops[id];
-			cube *= suffix.state;
-
-			hs = crc64(0, cube.map, 54);
-			auto iter = reached.find(hs);
-			if (iter == reached.end())
-			{
-				reached.insert(hs);
-				active.push({ code, cube });
-
-				for (size_t j = 0; j < pll_lst.size(); j++)
-				{
-					if (opt_seqs_pll[j].size() > 0) continue;
-					RubiksCube cube_dst = pll_lst[j];
-					cube_dst *= cube;
-					uint64_t hs = crc64(0, cube_dst.map, 54);
-					auto iter = prefix_map.find(hs);
-					if (iter != prefix_map.end())
-					{
-						auto suffix = decode_seq(code);
-						auto seq = decode_seq(iter->second);
-						if (seq.size() < 1 || suffix[0] == 5 || suffix[0] == 6)
-						{
-							opt_seqs_pll[j] = { 0 };
-						}
-						else
-						{
-							reverse_seq(seq);
-							suffix.insert(suffix.end(), seq.begin(), seq.end());
-							opt_seqs_pll[j] = suffix;
-							std::string str = seq2str(suffix);
-							printf("pll %d: %s\n", j, str.c_str());							
-						}
-						found_pll++;
-						printf("pll: %zu/%zu\n", found_pll, pll_lst.size());
-						if (found_pll >= pll_lst.size())
-						{
-							done = true;
-							break;
-						}
-					}
-				}
-				if (done)
-				{
-					break;
-				}
-			}
-		}
-		if (done)
-		{
-			break;
-		}
-	}
-
-	struct compare {
-		inline bool operator()(const std::vector<uint8_t>& first,
-			const std::vector<uint8_t>& second) const
-		{
-			return first.size() < second.size();
-		}
-	} c;
-
-	{
-		FILE* fp = fopen("found_pll.txt", "w");
-		std::sort(opt_seqs_pll.begin(), opt_seqs_pll.end(), c);
-		for (size_t j = 0; j < opt_seqs_pll.size(); j++)
-		{
-			if (opt_seqs_pll[j].size() > 0 && opt_seqs_pll[j][0] > 0)
-			{
-				std::string str = seq2str(opt_seqs_pll[j]);
-				fprintf(fp, "%s\n", str.c_str());
-			}
-		}
-		fprintf(fp, "\n");
-		fclose(fp);
-	}
-
 
 	return 0;
 }
@@ -1300,13 +1324,13 @@ int main()
 
 	{
 		RubiksCube cube;
-		keys.insert(crc64(0, cube.map, 54));
+		keys.insert(cube.hash());
 		cube *= RubiksCube::s_UCW;
-		keys.insert(crc64(0, cube.map, 54));
+		keys.insert(cube.hash());
 		cube *= RubiksCube::s_UCW;
-		keys.insert(crc64(0, cube.map, 54));
+		keys.insert(cube.hash());
 		cube *= RubiksCube::s_UCW;
-		keys.insert(crc64(0, cube.map, 54));
+		keys.insert(cube.hash());
 	}
 
 	const RubiksCube* ops[] =
@@ -1353,17 +1377,17 @@ int main()
 			last_j = j;
 			if (cube.partial_equals(RubiksCube::s_cube_o, oll_mask, false))
 			{
-				uint64_t hs = crc64(0, cube.map, 54);
+				uint64_t hs = cube.hash();
 				auto iter = keys.find(hs);
 				if (iter == keys.end())
 				{
 					keys.insert(hs);
 					cube *= RubiksCube::s_UCW;
-					keys.insert(crc64(0, cube.map, 54));
+					keys.insert(cube.hash());
 					cube *= RubiksCube::s_UCW;
-					keys.insert(crc64(0, cube.map, 54));
+					keys.insert(cube.hash());
 					cube *= RubiksCube::s_UCW;
-					keys.insert(crc64(0, cube.map, 54));
+					keys.insert(cube.hash());
 
 					printf("%s\n", seq.c_str());
 				}
