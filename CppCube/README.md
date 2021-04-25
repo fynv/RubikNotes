@@ -13,3 +13,11 @@ The program uses a Bidirectional BFS algorithm.
 
 The program can be stopped at anytime by pressing "ESC", which will end with an incomplete result file.
 
+## OLL Results
+
+### OLL 1
+![](../CFOPRemade/images/OLL_1.png)
+```
+F'U'LF'L'FFUFR'F'R
+BUL'BLBBU'B'RBR'
+```
