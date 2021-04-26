@@ -7,6 +7,7 @@ import json
 
 VK_FORMAT_R8G8B8A8_SRGB = 43
 VK_FORMAT_D32_SFLOAT = 126
+VK_COMPARE_OP_GREATER = 4
 
 class RubiksCube:
     def __init__(self):
@@ -1076,7 +1077,7 @@ class RubiksCube:
 
           
 class PerspectiveView:
-    def __init__(self, fn_skin = "skin_default.png"):
+    def __init__(self, fn_skin = "skin_default.png", backface = False):
         self.width = 640
         self.height = 480
         proj_mat = glm.perspective(glm.radians(45.0), self.width/self.height, 0.1, 1000.0)
@@ -1084,12 +1085,20 @@ class PerspectiveView:
         self.matrix = proj_mat*view_mat
 
         self.bg_color = [1.0, 1.0, 1.0, 1.0]
+        self.bg_depth = 1.0
+
+        options = {}
+        if backface:
+            self.bg_depth = 0.0
+            options['depth_compare_op'] = VK_COMPARE_OP_GREATER
 
         skin_in =  np.array(Image.open(fn_skin).convert('RGBA'))
         self.skin = vki.Cubemap(skin_in.shape[1], skin_in.shape[0]//6, VK_FORMAT_R8G8B8A8_SRGB)
         self.skin.upload(skin_in)
 
         self.rp = vki.Rasterizer(["matrix", "map", "dirs"], type_locked=True)
+
+        
 
         self.rp.add_draw_call(vki.DrawCall(
 '''
@@ -1158,7 +1167,7 @@ void main()
     vec3 dir = normalize(pos);
     outColor = texture(arr_cubemap[0], dir);
 }
-'''))
+''', options=options))
 
     def set_background_color(self, bg_color):
         self.bg_color = [bg_color[0], bg_color[1], bg_color[2], 1.0]
@@ -1177,7 +1186,7 @@ void main()
         gpu_matrix = vki.SVMat4x4(self.matrix)
         gpu_map = vki.device_vector_from_numpy(cube.map)
         gpu_dirs = vki.device_vector_from_numpy(cube.dirs)
-        self.rp.launch([6*9*6], [colorBuf4x], depthBuf4x, self.bg_color, 1.0, [gpu_matrix, gpu_map, gpu_dirs], resolveBufs=[colorBuf], cubemaps = [self.skin])
+        self.rp.launch([6*9*6], [colorBuf4x], depthBuf4x, self.bg_color, self.bg_depth, [gpu_matrix, gpu_map, gpu_dirs], resolveBufs=[colorBuf], cubemaps = [self.skin])
 
         image_out = np.empty((self.height, self.width, 4), dtype=np.uint8)
         colorBuf.download(image_out)
