@@ -12,7 +12,7 @@ function item_select()
     var list = document.getElementById('list');
     var view = document.getElementById('view');
     var item = window.data[list.selectedIndex];
-    var src = "https://cubing.github.io/AnimCubeJS/cube3.html?colorscheme=ywrobg&repeat=0&edit=0&movetext=1&metric=2&fonttype=0&snap=1&buttonheight=25&yz=1";
+    var src = "https://cubing.github.io/AnimCubeJS/old/cube3.html?colorscheme=ywrobg&repeat=0&edit=0&movetext=1&metric=2&fonttype=0&snap=1&buttonheight=25&yz=1";
     if ("initmove" in item)
     {
         src += "&initmove="+item.initmove;
@@ -38,7 +38,7 @@ function item_select()
 </script>
 
 <div style = "display: flex; flex-wrap: wrap;" >
-<iframe id="view" src="https://cubing.github.io/AnimCubeJS/cube3.html?colorscheme=ywrobg&repeat=0&edit=0&movetext=1&metric=2&fonttype=0&snap=1&buttonheight=25&yz=1" frameborder="0" width="400" height="400"></iframe>
+<iframe id="view" src="https://cubing.github.io/AnimCubeJS/old/cube3.html?colorscheme=ywrobg&repeat=0&edit=0&movetext=1&metric=2&fonttype=0&snap=1&buttonheight=25&yz=1" frameborder="0" width="400" height="400"></iframe>
 
 <div style = "margin:5px;">
     <p id="comment"></p>
