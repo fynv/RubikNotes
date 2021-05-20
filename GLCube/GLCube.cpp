@@ -42,35 +42,8 @@ inline double time_sec()
 	return (double)time_micro_sec() / 1000000.0;
 }
 
-std::vector<glm::mat4> get_transforms(const RubiksCube& cube, float radius, const std::string& op = "", float progress= 0.0f)
+std::vector<glm::mat4> get_transforms(const RubiksCube& cube, const std::string& op = "", float progress= 0.0f)
 {
-	static glm::vec3 s_origins[6 * 9] =
-	{
-		{ 1.0f, 1.0f, 1.0f}, { 1.0f, 1.0f, 0.0f}, { 1.0f, 1.0f, -1.0f},
-		{ 1.0f, 0.0f, 1.0f}, { 1.0f, 0.0f, 0.0f}, { 1.0f, 0.0f, -1.0f},
-		{ 1.0f, -1.0f, 1.0f}, { 1.0f, -1.0f, 0.0f}, { 1.0f, -1.0f, -1.0f},
-
-		{-1.0f, 1.0f, -1.0f}, {-1.0f, 1.0f, 0.0f}, {-1.0f, 1.0f, 1.0f},
-		{-1.0f, 0.0f, -1.0f}, {-1.0f, 0.0f, 0.0f}, {-1.0f, 0.0f, 1.0f},
-		{-1.0f, -1.0f, -1.0f}, {-1.0f, -1.0f, 0.0f}, {-1.0f, -1.0f, 1.0f},
-
-		{-1.0f, 1.0f, -1.0f}, {0.0f, 1.0f, -1.0f}, {1.0f, 1.0f, -1.0f},
-		{-1.0f, 1.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f, 0.0f},
-		{-1.0f, 1.0f, 1.0f}, {0.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 1.0f},
-
-		{-1.0f, -1.0f, 1.0f}, {0.0f, -1.0f, 1.0f}, {1.0f, -1.0f, 1.0f},
-		{-1.0f, -1.0f, 0.0f}, {0.0f, -1.0f, 0.0f}, {1.0f, -1.0f, 0.0f},
-		{-1.0f, -1.0f, -1.0f}, {0.0f, -1.0f, -1.0f}, {1.0f, -1.0f, -1.0f},
-
-		{-1.0f, 1.0f, 1.0f }, {0.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 1.0f},
-		{-1.0f, 0.0f, 1.0f }, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f, 1.0f},
-		{-1.0f, -1.0f, 1.0f }, {0.0f, -1.0f, 1.0f}, {1.0f, -1.0f, 1.0f},
-
-		{1.0f, 1.0f, -1.0f}, {0.0f, 1.0f, -1.0f}, {-1.0f, 1.0f, -1.0f},
-		{1.0f, 0.0f, -1.0f}, {0.0f, 0.0f, -1.0f}, {-1.0f, 0.0f, -1.0f},
-		{1.0f, -1.0f, -1.0f}, {0.0f, -1.0f, -1.0f}, {-1.0f, -1.0f, -1.0f},
-	};
-
 	static glm::vec3 s_dirs[6] = { {1.0f, 0.0f, 0.0f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, -1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, -1.0f} };
 	static glm::vec3 s_dirs2[6 * 4] =
 	{
@@ -169,7 +142,6 @@ std::vector<glm::mat4> get_transforms(const RubiksCube& cube, float radius, cons
 	for (int i = 0; i < 6; i++)
 	{
 		int face_in = ids_center[i];		
-		glm::vec3 origin_in = s_origins[face_in] * radius;
 		glm::vec3 dir1_in = s_dirs[face_in / 9];
 		glm::vec3 dir2_in = s_dirs2[face_in / 9 * 4];
 		glm::vec3 dir3_in = glm::normalize(glm::cross(dir1_in, dir2_in));
@@ -177,10 +149,9 @@ std::vector<glm::mat4> get_transforms(const RubiksCube& cube, float radius, cons
 		mat_in[0] = glm::vec4(dir1_in, 0.0f);
 		mat_in[1] = glm::vec4(dir2_in, 0.0f);
 		mat_in[2] = glm::vec4(dir3_in, 0.0f);
-		mat_in[3] = glm::vec4(origin_in, 1.0f);
+		mat_in[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		int face_out = reverse.map[face_in];
-		glm::vec3 origin_out = s_origins[face_out] * radius;
 		glm::vec3 dir1_out = s_dirs[face_out / 9];
 		glm::vec3 dir2_out = s_dirs2[face_out / 9 * 4 + reverse.dirs[face_out]];
 		glm::vec3 dir3_out = glm::normalize(glm::cross(dir1_out, dir2_out));
@@ -188,7 +159,7 @@ std::vector<glm::mat4> get_transforms(const RubiksCube& cube, float radius, cons
 		mat_out[0] = glm::vec4(dir1_out, 0.0f);
 		mat_out[1] = glm::vec4(dir2_out, 0.0f);
 		mat_out[2] = glm::vec4(dir3_out, 0.0f);
-		mat_out[3] = glm::vec4(origin_out, 1.0f);
+		mat_out[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 		
 		res[i] = mat_out * glm::inverse(mat_in);
 
@@ -201,7 +172,6 @@ std::vector<glm::mat4> get_transforms(const RubiksCube& cube, float radius, cons
 	for (int i = 0; i < 12; i++)
 	{
 		glm::ivec2 face_in = ids_edge[i];
-		glm::vec3 origin_in = s_origins[face_in.x] * radius;
 		glm::vec3 dir1_in = s_dirs[face_in.x / 9];
 		glm::vec3 dir2_in = s_dirs[face_in.y / 9];
 		glm::vec3 dir3_in = glm::normalize(glm::cross(dir1_in, dir2_in));
@@ -209,10 +179,9 @@ std::vector<glm::mat4> get_transforms(const RubiksCube& cube, float radius, cons
 		mat_in[0] = glm::vec4(dir1_in, 0.0f);
 		mat_in[1] = glm::vec4(dir2_in, 0.0f);
 		mat_in[2] = glm::vec4(dir3_in, 0.0f);
-		mat_in[3] = glm::vec4(origin_in, 1.0f);
+		mat_in[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		glm::ivec2 face_out = { reverse.map[face_in.x], reverse.map[face_in.y] };
-		glm::vec3 origin_out = s_origins[face_out.x] * radius;
 		glm::vec3 dir1_out = s_dirs[face_out.x / 9];
 		glm::vec3 dir2_out = s_dirs[face_out.y / 9];
 		glm::vec3 dir3_out = glm::normalize(glm::cross(dir1_out, dir2_out));
@@ -220,7 +189,7 @@ std::vector<glm::mat4> get_transforms(const RubiksCube& cube, float radius, cons
 		mat_out[0] = glm::vec4(dir1_out, 0.0f);
 		mat_out[1] = glm::vec4(dir2_out, 0.0f);
 		mat_out[2] = glm::vec4(dir3_out, 0.0f);
-		mat_out[3] = glm::vec4(origin_out, 1.0f);
+		mat_out[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		res[i+6] = mat_out * glm::inverse(mat_in);
 
@@ -232,9 +201,7 @@ std::vector<glm::mat4> get_transforms(const RubiksCube& cube, float radius, cons
 
 	for (int i = 0; i < 8; i++)
 	{
-		glm::ivec3 face_in = ids_corner[i];
-		glm::vec3 origin_in = s_origins[face_in.x] * radius;
-		
+		glm::ivec3 face_in = ids_corner[i];		
 		glm::vec3 dir1_in = s_dirs[face_in.x / 9];
 		glm::vec3 dir2_in = s_dirs[face_in.y / 9];
 		glm::vec3 dir3_in = s_dirs[face_in.z / 9];
@@ -242,10 +209,9 @@ std::vector<glm::mat4> get_transforms(const RubiksCube& cube, float radius, cons
 		mat_in[0] = glm::vec4(dir1_in, 0.0f);
 		mat_in[1] = glm::vec4(dir2_in, 0.0f);
 		mat_in[2] = glm::vec4(dir3_in, 0.0f);
-		mat_in[3] = glm::vec4(origin_in, 1.0f);
+		mat_in[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		glm::ivec3 face_out = { reverse.map[face_in.x], reverse.map[face_in.y], reverse.map[face_in.z] };
-		glm::vec3 origin_out = s_origins[face_out.x] * radius;
 		glm::vec3 dir1_out = s_dirs[face_out.x / 9];
 		glm::vec3 dir2_out = s_dirs[face_out.y / 9];
 		glm::vec3 dir3_out = s_dirs[face_out.z / 9];
@@ -253,7 +219,7 @@ std::vector<glm::mat4> get_transforms(const RubiksCube& cube, float radius, cons
 		mat_out[0] = glm::vec4(dir1_out, 0.0f);
 		mat_out[1] = glm::vec4(dir2_out, 0.0f);
 		mat_out[2] = glm::vec4(dir3_out, 0.0f);
-		mat_out[3] = glm::vec4(origin_out, 1.0f);
+		mat_out[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		res[i + 18] = mat_out * glm::inverse(mat_in);
 
@@ -346,7 +312,7 @@ int main()
 
 	while (glfwWindowShouldClose(window) == 0)
 	{
-		std::vector<glm::mat4> trans = get_transforms(cube, 6.0f, notes[pos], prog);
+		std::vector<glm::mat4> trans = get_transforms(cube, notes[pos], prog);
 		mesh.trans_buf->upload(trans.data());
 
 		glfwPollEvents();
