@@ -22,7 +22,7 @@
 #define MODE_OLL_PREPARE 4
 #define MODE_OLL_DISCOVER 5
 
-#define MODE MODE_OLL_DISCOVER
+#define MODE MODE_PLL_PREPARE
 
 #if MODE!=MODE_PACK_BASEDATA
 #include "base_data.hpp"
@@ -588,7 +588,7 @@ int main()
 		RubiksCube state;
 	};
 
-	std::unordered_map<uint64_t, uint64_t> reached;
+	std::unordered_map<uint64_t, int> reached;
 	std::queue<Record> active;
 
 	FILE* fp = fopen("PLL8.dat", "wb");
@@ -760,7 +760,7 @@ int main()
 		RubiksCube state;
 	};
 
-	std::unordered_map<uint64_t, uint64_t> reached;
+	std::unordered_map<uint64_t, int> reached;
 	std::queue<Record> active;
 
 	uint64_t hs = RubiksCube::s_cube_o.hash();
@@ -904,7 +904,7 @@ int main()
 		RubiksCube state;
 	};
 
-	std::unordered_map<uint64_t, uint64_t> reached;
+	std::unordered_map<uint64_t, int> reached;
 	std::queue<Record> active;
 
 	FILE* fp = fopen("OLL8.dat", "wb");
@@ -1098,7 +1098,7 @@ int main()
 		RubiksCube state;
 	};
 
-	std::unordered_map<uint64_t, uint64_t> reached;
+	std::unordered_map<uint64_t, int> reached;
 	std::queue<Record> active;
 
 	uint64_t hs = RubiksCube::s_cube_o.hash();
